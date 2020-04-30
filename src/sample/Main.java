@@ -14,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -95,6 +96,7 @@ public class Main extends Application {
             // Test output
             System.out.println("Quit was clicked!");
         });
+
         Button guessBtn = new Button("Make a Guess");
         guessBtn.setOnAction(e -> {
             // ToDo: Need to add real action
@@ -111,6 +113,7 @@ public class Main extends Application {
             // Test output
             System.out.println("Guess was clicked!");
         });
+
         Button randomDealBtn = new Button("Random Deal");
         randomDealBtn.setOnAction(e -> {
             // ToDo: Need to add real action
@@ -121,6 +124,13 @@ public class Main extends Application {
             System.out.println("Random Deal was clicked!");
         });
 
+        // Event handler for clicking a card
+        // Now how to use this to get the actions we want...
+        imageViews.get("view0").addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            System.out.println("Card Pressed!");
+            event.consume();
+        });
+
         gridPane.add(randomDealBtn, 9, 0);
         gridPane.add(guessBtn, 9, 1);
         gridPane.add(quitBtn, 9, 2);
@@ -129,7 +139,7 @@ public class Main extends Application {
 
         Scene scene = new Scene(gridPane);
 
-        primaryStage.setTitle("Exercise14_03");
+        primaryStage.setTitle("Art Dealer Game");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
