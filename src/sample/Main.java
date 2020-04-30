@@ -27,6 +27,8 @@ public class Main extends Application {
 
         ArrayList<String> cards = new ArrayList<>();
 
+
+
         for (int i = 0; i < 52; i++) {
             cards.add(String.valueOf(i + 1));
         }
