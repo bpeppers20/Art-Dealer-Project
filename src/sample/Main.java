@@ -24,28 +24,20 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"));
+
         ArrayList<String> cards = new ArrayList<>();
 
         for (int i = 0; i < 52; i++) {
             cards.add(String.valueOf(i + 1));
         }
 
-        java.util.Collections.shuffle(cards);
+        // Shuffle cards; Not sure if we want or need this
+        //java.util.Collections.shuffle(cards);
 
+        // Data structure to hold images of all cards
         Map<String, ImageView> imageViews = new HashMap<String, ImageView>();
-
+        // Fill data structure
         setupCardImageViews(cards, imageViews);
-
-//        ImageView view1 = new ImageView(
-//                new Image("https://liveexample.pearsoncmg.com/book/image/card/" + cards.get(0) + ".png"));
-//        ImageView view2 = new ImageView(
-//                new Image("https://liveexample.pearsoncmg.com/book/image/card/" + cards.get(1) + ".png"));
-//        ImageView view3 = new ImageView(
-//                new Image("https://liveexample.pearsoncmg.com/book/image/card/" + cards.get(2) + ".png"));
-
-        HBox root = new HBox();
-
-        root.setSpacing(10);
 
         //Creating a Grid Pane
         GridPane gridPane = new GridPane();
@@ -68,9 +60,8 @@ public class Main extends Application {
         int i = 0;
         for(int x = 0; x < 52; x++) {
             String key = "view" + x;
-
             gridPane.add(imageViews.get(key), i, j);
-
+            // Adding cards to grid with 9 in each Row
             if((i % 8) == 0 && i != 0) {
                 j++;
                 i = 0;
@@ -94,14 +85,37 @@ public class Main extends Application {
         // Buttons
         Button quitBtn = new Button("Quit Game");
         quitBtn.setOnAction(e -> {
+            // ToDo: Need to add real action
+                // 1. Display alert to ensure they meant to quit
+                    // a. Yes -> end game
+                    // b. No -> remove alert and proceed as normal
+
+            // Test output
             System.out.println("Quit was clicked!");
         });
         Button guessBtn = new Button("Make a Guess");
         guessBtn.setOnAction(e -> {
+            // ToDo: Need to add real action
+                // 1. If playing against computer
+                    // a. Show input box for guess
+                    // b.
+                // 2. If playing against Student
+                    // a. Show input box for guess
+                    // b. Once entered, show 'Correct' and 'Wrong' buttons
+                    // c. 2nd player will click one of the buttons
+                        // i. Correct -> Game is over and player won
+                        // ii. Wrong  -> Decrement guess counter, start next turn
+
+            // Test output
             System.out.println("Guess was clicked!");
         });
         Button randomDealBtn = new Button("Random Deal");
         randomDealBtn.setOnAction(e -> {
+            // ToDo: Need to add real action
+                // 1. Select 4 cards randomly
+                // 2. Show 4 cards in 'deal spot'
+
+            // Test output
             System.out.println("Random Deal was clicked!");
         });
 
@@ -111,12 +125,6 @@ public class Main extends Application {
 
         gridPane.setStyle("-fx-background-color: GREEN;");
 
-        //setupHBoxChildren(root, imageViews);
-
-//        root.getChildren().add(view1);
-//        root.getChildren().add(view2);
-//        root.getChildren().add(view3);
-
         Scene scene = new Scene(gridPane);
 
         primaryStage.setTitle("Exercise14_03");
@@ -124,19 +132,13 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    // Maps keys and images together for all 52 cards
     public void setupCardImageViews(ArrayList<String> cards, Map<String, ImageView> imageViews) {
         for (int i = 0; i < 52; i++) {
             imageViews.put("view" + i, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
                     + cards.get(i) + ".png")));
         }
     }
-
-//    public void setupHBoxChildren(HBox root, Map<String, ImageView> imageViews) {
-//        for (Map.Entry<String, ImageView> entry : imageViews.entrySet()) {
-//            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-//            root.getChildren().add(entry.getValue());
-//        }
-//    }
 
     public static void main(String[] args) {
         launch(args);
