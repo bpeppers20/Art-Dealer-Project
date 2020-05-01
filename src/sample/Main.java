@@ -191,11 +191,11 @@ public class Main extends Application {
 
         int i = 0;  // Column counter and value(add 1 for constructor)
         int j = 0;  // Row counter and suit
-        // For Card Class
+        // Creating Map of Card Objects
         for (int k = 0; k < 52; k++) {
             cards.put("card" + k, new Card(i + 1, j, i, j, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
                     + (k + 1) + ".png"))));
-
+            //
             if((i % 12) == 0 && i != 0) {
                 j++;
                 i = 0;
@@ -207,7 +207,7 @@ public class Main extends Application {
             // Adds click event handler to place card in hbox
             cards.get("card" + k).getImage().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 if(hbox.getChildren().size() < 4) {
-                    hbox.getChildren().add(cards.get("card" + finalK));
+                    hbox.getChildren().add(cards.get("card" + finalK).getImage());
                 }
 
                 e.consume();
