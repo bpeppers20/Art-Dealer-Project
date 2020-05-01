@@ -3,8 +3,10 @@ package sample;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.awt.event.InputEvent;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -28,8 +30,6 @@ public class Main extends Application {
 
         ArrayList<String> cards = new ArrayList<>();
 
-
-
         for (int i = 0; i < 52; i++) {
             cards.add(String.valueOf(i + 1));
         }
@@ -37,11 +37,9 @@ public class Main extends Application {
         // Shuffle cards; Not sure if we want or need this
         //java.util.Collections.shuffle(cards);
 
-        // Data structure to hold images of all cards
-        Map<String, ImageView> imageViews = new HashMap<String, ImageView>();
-        // Fill data structure
-        setupCardImageViews(cards, imageViews);
 
+
+        /* * * GRID PANE SETUP * * */
         //Creating a Grid Pane
         GridPane gridPane = new GridPane();
 
@@ -57,6 +55,20 @@ public class Main extends Application {
 
         //Setting the Grid alignment
         gridPane.setAlignment(Pos.CENTER);
+
+        // Current Card section
+        HBox hbox = new HBox();
+        hbox.setMinHeight(150);
+        hbox.setPadding(new Insets(15, 12, 15, 12));
+        hbox.setSpacing(10);
+        hbox.setStyle("-fx-background-color: #336699;");
+
+        gridPane.add(hbox, 0, 7, 8,2);
+
+        // Data structure to hold images of all cards
+        Map<String, ImageView> imageViews = new HashMap<String, ImageView>();
+        // Fill data structure
+        setupCardImageViews(cards, imageViews, hbox);
 
         // Add all cards in gridPane
         int j = 0;
@@ -124,12 +136,13 @@ public class Main extends Application {
             System.out.println("Random Deal was clicked!");
         });
 
-        // Event handler for clicking a card
-        // Now how to use this to get the actions we want...
-        imageViews.get("view0").addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            System.out.println("Card Pressed!");
-            event.consume();
-        });
+
+
+        EventHandler handler = (EventHandler<MouseEvent>) event -> {
+
+        };
+
+//        imageViews.get("view0").addEventHandler(MouseEvent.MOUSE_CLICKED, handler);
 
         gridPane.add(randomDealBtn, 9, 0);
         gridPane.add(guessBtn, 9, 1);
@@ -145,10 +158,15 @@ public class Main extends Application {
     }
 
     // Maps keys and images together for all 52 cards
-    public void setupCardImageViews(ArrayList<String> cards, Map<String, ImageView> imageViews) {
+    public void setupCardImageViews(ArrayList<String> cards, Map<String, ImageView> imageViews, HBox hbox) {
         for (int i = 0; i < 52; i++) {
             imageViews.put("view" + i, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
                     + cards.get(i) + ".png")));
+            int finalI = i;
+            imageViews.get("view" + i).addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                hbox.getChildren().add(imageViews.get("view" + finalI));
+                e.consume();
+            });
         }
     }
 
