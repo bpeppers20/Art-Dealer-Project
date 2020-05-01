@@ -26,10 +26,15 @@ import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 
+
+
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
 
     public void start(Stage primaryStage) throws Exception{
+        System.out.println("java.version: " + System.getProperty("java.version"));
+        System.out.println("javafx.runtime.version: " + System.getProperty("javafx.runtime.version"));
+
         this.mainStage = primaryStage;
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
         //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"))
@@ -224,7 +229,6 @@ public class Main extends Application {
                 if(numSelected < 4) {
                     hbox.getChildren().add(curCard.getImage());
                     selectedCards[numSelected] = curCard;
-                    System.out.println("x: " + selectedCards[numSelected].getXPos() + " y: " + curCard.getYPos());
                 }
 
                 e.consume();
