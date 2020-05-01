@@ -23,6 +23,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.scene.control.Alert.AlertType;
 
 public class Main extends Application {
 
@@ -162,9 +163,14 @@ public class Main extends Application {
         });
 
         // -- Confirm Deal --
-        Button confirmDealBtn = new Button("Confirm Cards to Deal");
-        confirmDealBtn.setOnAction(e -> {
+        // create an alert
+        Alert a = new Alert(Alert.AlertType.NONE);
 
+        Button confirmDealBtn = new Button("Confirm Selection");
+        confirmDealBtn.setOnAction(e -> {
+            a.setAlertType(Alert.AlertType.CONFIRMATION);
+            a.setContentText("Are you sure you want to sell these cards?");
+            a.show();
         });
 
         // -- Reset Deal --
