@@ -90,8 +90,8 @@ public class Main extends Application {
                 ("Easy (K-2)", "Medium (3-5)", "Hard (6-8)");
 
         // Add to difficulty choiceBox gridPane
-        gridPane.add(difficultyLabel, 8, 6);
-        gridPane.add(difficultychoiceBox, 9, 6);
+        gridPane.add(difficultyLabel, 13, 3);
+        gridPane.add(difficultychoiceBox, 13, 4);
 
 
         /* * * Buttons * * */
@@ -149,10 +149,28 @@ public class Main extends Application {
 
         });
 
+        Button confirmDealBtn = new Button("Confirm Cards to Deal");
+        confirmDealBtn.setOnAction(e -> {
+
+        });
+
+        Button resetDealBtn = new Button("Reset Cards");
+        resetDealBtn.setOnAction(e -> {
+            // Testing
+            System.out.println(hbox.getChildren());
+            hbox.getChildren().clear();
+            System.out.println("After: " + hbox.getChildren());
+
+            // Reset random deal button since all cards deselected
+            randomDealBtn.setDisable(false);
+        });
+
         // Add buttons to GridPane
-        gridPane.add(randomDealBtn, 9, 0);
-        gridPane.add(guessBtn, 9, 1);
-        gridPane.add(closeButton, 9, 2);
+        gridPane.add(randomDealBtn, 13, 0);
+        gridPane.add(guessBtn, 13, 1);
+        gridPane.add(closeButton, 13, 2);
+        gridPane.add(confirmDealBtn, 13, 7);
+        gridPane.add(resetDealBtn, 13, 8);
 
         Scene scene = new Scene(gridPane);
 
@@ -185,7 +203,7 @@ public class Main extends Application {
             String key = "view" + x;
             gridPane.add(imageViews.get(key), i, j);
             // Adding cards to grid with 9 in each Row
-            if((i % 8) == 0 && i != 0) {
+            if((i % 12) == 0 && i != 0) {
                 j++;
                 i = 0;
             } else {
