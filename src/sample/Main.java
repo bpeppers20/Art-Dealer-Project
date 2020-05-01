@@ -19,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,19 +27,36 @@ import javafx.stage.WindowEvent;
 import javafx.scene.control.Alert.AlertType;
 
 public class Main extends Application {
-
-
-
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
+    private int guessCounter;
+    private int difficulty;
+
+    // Difficulty level codes
+    public final static int EASY = 0, MEDIUM = 1, HARD = 2;
 
     public void start(Stage primaryStage) throws Exception{
-        System.out.println("java.version: " + System.getProperty("java.version"));
-        System.out.println("javafx.runtime.version: " + System.getProperty("javafx.runtime.version"));
-
         this.mainStage = primaryStage;
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
         //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"))
+
+        // Set Difficulty
+        /* ToDo: Need to implement a selection of difficulty at
+                 at start of the game */
+        difficulty = 0; // Set arbitrarily for now
+
+        // Set number of guesses allowed
+        switch(difficulty) {
+            case EASY:
+                guessCounter = 10;
+                break;
+            case MEDIUM:
+                guessCounter = 8;
+                break;
+            case HARD:
+                guessCounter = 6;
+                break;
+        }
 
         /* * * GRID PANE SETUP * * */
         //Creating a Grid Pane
@@ -57,7 +75,8 @@ public class Main extends Application {
         //Setting the Grid alignment
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.setStyle("-fx-background-color: GREEN;");
+        // GridPane styling
+        gridPane.setStyle("-fx-background-color: GREEN; -fx-font-family: 'Cambria Math';");
         /* * * * * * * * * * * * * */
 
         // Current Card section
@@ -68,6 +87,17 @@ public class Main extends Application {
         hbox.setStyle("-fx-background-color: #336699;");
         // Add hbox to gridPane at the bottom
         gridPane.add(hbox, 0, 7, 8,2);
+
+        // Guess Counter box
+        VBox guessVbox = new VBox();
+        Text guessLabel = new Text("Guesses Remaining:");
+        Text guessesRemainingLabel = new Text(String.valueOf(guessCounter));
+        guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
+        guessVbox.setStyle("-fx-font-size: 125%; -fx-alignment: center; -fx-border-color: black; -fx-border-width: 2px;" +
+                "-fx-border-radius: 95%;");
+
+        // Add guessHbox to gridPane
+        gridPane.add(guessVbox, 9,7,2,1);
 
         // Data structure to hold images of all cards
         Map<String, Card> cards = new HashMap<String, Card>();
@@ -115,6 +145,15 @@ public class Main extends Application {
                         // i. Correct -> Game is over and player won
                         // ii. Wrong  -> Decrement guess counter, start next turn
 
+            // Decrement global guess counter
+            guessCounter--;
+            // Remove old label
+            guessVbox.getChildren().remove(1);
+            // Create new label
+            Text guessCounterLabel = new Text(String.valueOf(guessCounter));
+            // Add label to guessVbox
+            guessVbox.getChildren().add(1, guessCounterLabel);
+
             // Test output
             System.out.println("Guess was clicked!");
         });
@@ -133,7 +172,6 @@ public class Main extends Application {
                 list.add(new Integer(k));
             }
              Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
-
 
             // Switch cascades to add the appropriate number of
             // randomly selected cards depending on how many are
