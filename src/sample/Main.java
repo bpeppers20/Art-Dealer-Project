@@ -27,6 +27,7 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
     private Stage mainStage;
+    private Card[] selectedCards = new Card[4];
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -124,8 +125,8 @@ public class Main extends Application {
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
         randomDealBtn.setOnAction(e -> {
-            // Implement the Card Class once that is complete
-
+            // Current number of selected cards
+            int numSelected = hbox.getChildren().size();
 
             // ArrayList holding 0-51 to access imageViews indices
             ArrayList<Integer> list = new ArrayList<Integer>();
@@ -134,14 +135,30 @@ public class Main extends Application {
             }
             Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
 
-            // Now grab 4 'random numbers' from the shuffled list to grab cards
-            ImageView card1 = cards.get("card" + list.get(0)).getImage();
-            ImageView card2 = cards.get("card" + list.get(1)).getImage();
-            ImageView card3 = cards.get("card" + list.get(2)).getImage();
-            ImageView card4 = cards.get("card" + list.get(3)).getImage();
-
-            // Add 4 random cards to selected cards box
-            hbox.getChildren().addAll(card1, card2, card3, card4);
+            // Switch cascades to add the appropriate number of
+            // randomly selected cards depending on how many are
+            // already selected
+            switch (numSelected) {
+                case 0:
+                    selectedCards[0] = cards.get("card" + list.get(0));
+                    ImageView cardImage1 = selectedCards[0].getImage();
+                    hbox.getChildren().add(cardImage1);
+                case 1:
+                    selectedCards[1] = cards.get("card" + list.get(1));
+                    ImageView cardImage2 = selectedCards[1].getImage();
+                    hbox.getChildren().add(cardImage2);
+                case 2:
+                    selectedCards[2] = cards.get("card" + list.get(2));
+                    ImageView cardImage3 = selectedCards[2].getImage();
+                    hbox.getChildren().add(cardImage3);
+                case 3:
+                    selectedCards[3] = cards.get("card" + list.get(3));
+                    ImageView cardImage4 = selectedCards[3].getImage();
+                    hbox.getChildren().add(cardImage4);
+                    break;
+                default:
+                    System.out.println("Already 4 Cards selected");
+            }
 
             // Disable Random Deal button
             randomDealBtn.setDisable(true);
@@ -159,14 +176,16 @@ public class Main extends Application {
         // -- Reset Deal --
         Button resetDealBtn = new Button("Reset Cards");
         resetDealBtn.setOnAction(e -> {
+            int numSelected = hbox.getChildren().size();
+            Card curCard;
 
-            /* ToDo: Need to store original positions in GridPane
-                for each card to be able to use gridPane.add()
-                and place them back in their original positions*/
-            // Testing
-            System.out.println(hbox.getChildren());
-            hbox.getChildren().clear();
-            System.out.println("After: " + hbox.getChildren());
+            for(int i = 0; i < numSelected; i++) {
+                curCard = selectedCards[i];
+                gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
+            }
+
+            // Clear Selected Cards array
+            Arrays.fill(selectedCards, null);
 
             // Reset random deal button since all cards deselected
             randomDealBtn.setDisable(false);
@@ -206,31 +225,18 @@ public class Main extends Application {
             int finalK = k;
             // Adds click event handler to place card in hbox
             cards.get("card" + k).getImage().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-                if(hbox.getChildren().size() < 4) {
-                    hbox.getChildren().add(cards.get("card" + finalK).getImage());
+                int numSelected = hbox.getChildren().size();
+                Card curCard = cards.get("card" + finalK);
+                if(numSelected < 4) {
+                    hbox.getChildren().add(curCard.getImage());
+                    selectedCards[numSelected] = curCard;
+                    System.out.println("x: " + selectedCards[numSelected].getXPos() + " y: " + curCard.getYPos());
                 }
 
                 e.consume();
             });
 
         }
-
-
-//        for (int i = 0; i < 52; i++) {
-//
-//            imageViews.put("view" + i, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
-//                    + cards.get(i) + ".png")));
-//            int finalI = i;
-//            // Adds click event handler to place card in hbox
-//            imageViews.get("view" + i).addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-//                if(hbox.getChildren().size() < 4) {
-//                    hbox.getChildren().add(imageViews.get("view" + finalI));
-//                }
-//
-//                e.consume();
-//            });
-//        }
-
 
     }
 
