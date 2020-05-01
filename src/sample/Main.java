@@ -27,17 +27,12 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
     private Stage mainStage;
+    private Card[] selectedCards = new Card[4];
 
     public void start(Stage primaryStage) throws Exception{
         this.mainStage = primaryStage;
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-        //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        // Fill list with string values used to fetch images
-        // in setupCardImageViews()
-        ArrayList<String> cards = new ArrayList<>();
-        for (int i = 0; i < 52; i++) {
-            cards.add(String.valueOf(i + 1));
-        }
+        //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"))
 
         /* * * GRID PANE SETUP * * */
         //Creating a Grid Pane
@@ -69,12 +64,12 @@ public class Main extends Application {
         gridPane.add(hbox, 0, 7, 8,2);
 
         // Data structure to hold images of all cards
-        Map<String, ImageView> imageViews = new HashMap<String, ImageView>();
+        Map<String, Card> cards = new HashMap<String, Card>();
         // Fill data structure
-        setupCardImageViews(cards, imageViews, hbox);
+        setupCards(cards, hbox);
 
         // Add cards to GridPane
-        addCards(gridPane, imageViews);
+        addCards(gridPane, cards);
 
 
         /* ToDo: Need to consider how to implement difficulty selection
@@ -88,11 +83,11 @@ public class Main extends Application {
                 ("Easy (K-2)", "Medium (3-5)", "Hard (6-8)");
 
         // Add to difficulty choiceBox gridPane
-        gridPane.add(difficultyLabel, 8, 6);
-        gridPane.add(difficultychoiceBox, 9, 6);
+        gridPane.add(difficultyLabel, 13, 3);
+        gridPane.add(difficultychoiceBox, 13, 4);
 
 
-        /* * * Buttons * * */
+        /* * * * Buttons * * * */
 
         // -- Close Application --
         Button closeButton = new Button("Close Application");
@@ -121,8 +116,8 @@ public class Main extends Application {
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
         randomDealBtn.setOnAction(e -> {
-            // Implement the Card Class once that is complete
-
+            // Current number of selected cards
+            int numSelected = hbox.getChildren().size();
 
             // ArrayList holding 0-51 to access imageViews indices
             // Where to Implement Card Class
@@ -137,14 +132,31 @@ public class Main extends Application {
             // Maybe use something like srand()?
             ArrayList<CardClass> deck = deckManager.createDeck();
 
-            // Now grab 4 'random numbers' from the shuffled list to grab cards
-            ImageView card1 = imageViews.get("view" + deck.get(0).getCardValue());
-            ImageView card2 = imageViews.get("view" + deck.get(1).getCardValue());
-            ImageView card3 = imageViews.get("view" + deck.get(2).getCardValue());
-            ImageView card4 = imageViews.get("view" + deck.get(3).getCardValue());
 
-            // Add 4 random cards to selected cards box
-            hbox.getChildren().addAll(card1, card2, card3, card4);
+            // Switch cascades to add the appropriate number of
+            // randomly selected cards depending on how many are
+            // already selected
+            switch (numSelected) {
+                case 0:
+                    selectedCards[0] = cards.get("card" + list.get(0));
+                    ImageView cardImage1 = selectedCards[0].getImage();
+                    hbox.getChildren().add(cardImage1);
+                case 1:
+                    selectedCards[1] = cards.get("card" + list.get(1));
+                    ImageView cardImage2 = selectedCards[1].getImage();
+                    hbox.getChildren().add(cardImage2);
+                case 2:
+                    selectedCards[2] = cards.get("card" + list.get(2));
+                    ImageView cardImage3 = selectedCards[2].getImage();
+                    hbox.getChildren().add(cardImage3);
+                case 3:
+                    selectedCards[3] = cards.get("card" + list.get(3));
+                    ImageView cardImage4 = selectedCards[3].getImage();
+                    hbox.getChildren().add(cardImage4);
+                    break;
+                default:
+                    System.out.println("Already 4 Cards selected");
+            }
 
             // Disable Random Deal button
             randomDealBtn.setDisable(true);
@@ -153,10 +165,36 @@ public class Main extends Application {
 
         });
 
+        // -- Confirm Deal --
+        Button confirmDealBtn = new Button("Confirm Cards to Deal");
+        confirmDealBtn.setOnAction(e -> {
+
+        });
+
+        // -- Reset Deal --
+        Button resetDealBtn = new Button("Reset Cards");
+        resetDealBtn.setOnAction(e -> {
+            int numSelected = hbox.getChildren().size();
+            Card curCard;
+
+            for(int i = 0; i < numSelected; i++) {
+                curCard = selectedCards[i];
+                gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
+            }
+
+            // Clear Selected Cards array
+            Arrays.fill(selectedCards, null);
+
+            // Reset random deal button since all cards deselected
+            randomDealBtn.setDisable(false);
+        });
+
         // Add buttons to GridPane
-        gridPane.add(randomDealBtn, 9, 0);
-        gridPane.add(guessBtn, 9, 1);
-        gridPane.add(closeButton, 9, 2);
+        gridPane.add(randomDealBtn, 13, 0);
+        gridPane.add(guessBtn, 13, 1);
+        gridPane.add(closeButton, 13, 2);
+        gridPane.add(confirmDealBtn, 13, 7);
+        gridPane.add(resetDealBtn, 13, 8);
 
         Scene scene = new Scene(gridPane);
 
@@ -166,30 +204,49 @@ public class Main extends Application {
     }
 
     // Maps keys and images together for all 52 cards
-    public void setupCardImageViews(ArrayList<String> cards, Map<String, ImageView> imageViews, HBox hbox) {
-        for (int i = 0; i < 52; i++) {
-            imageViews.put("view" + i, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
-                    + cards.get(i) + ".png")));
-            int finalI = i;
+    public void setupCards(Map<String, Card> cards, HBox hbox) {
+
+        int i = 0;  // Column counter and value(add 1 for constructor)
+        int j = 0;  // Row counter and suit
+        // Creating Map of Card Objects
+        for (int k = 0; k < 52; k++) {
+            cards.put("card" + k, new Card(i + 1, j, i, j, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
+                    + (k + 1) + ".png"))));
+            //
+            if((i % 12) == 0 && i != 0) {
+                j++;
+                i = 0;
+            } else {
+                i++;
+            }
+
+            int finalK = k;
             // Adds click event handler to place card in hbox
-            imageViews.get("view" + i).addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-                if(hbox.getChildren().size() < 4) {
-                    hbox.getChildren().add(imageViews.get("view" + finalI));
+            cards.get("card" + k).getImage().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                int numSelected = hbox.getChildren().size();
+                Card curCard = cards.get("card" + finalK);
+                if(numSelected < 4) {
+                    hbox.getChildren().add(curCard.getImage());
+                    selectedCards[numSelected] = curCard;
+                    System.out.println("x: " + selectedCards[numSelected].getXPos() + " y: " + curCard.getYPos());
                 }
+
                 e.consume();
             });
+
         }
+
     }
 
-    public void addCards(GridPane gridPane, Map<String, ImageView> imageViews) {
-        // Add all cards in gridPane
-        int j = 0;
-        int i = 0;
-        for(int x = 0; x < 52; x++) {
-            String key = "view" + x;
-            gridPane.add(imageViews.get(key), i, j);
-            // Adding cards to grid with 9 in each Row
-            if((i % 8) == 0 && i != 0) {
+    // Add all cards in gridPane
+    public void addCards(GridPane gridPane, Map<String, Card> cards) {
+        int j = 0;  // Row counter
+        int i = 0;  // Column counter
+        for(int x = 0; x < 52; x++) {   // x is used to access all the card views
+            String key = "card" + x;
+            gridPane.add(cards.get(key).getImage(), i, j);
+            // Adding cards to grid with 13 in each Row
+            if((i % 12) == 0 && i != 0) {
                 j++;
                 i = 0;
             } else {
@@ -198,6 +255,7 @@ public class Main extends Application {
         }
     }
 
+    // Display alert to confirm user wants to close app
     private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
         Alert closeConfirmation = new Alert(
                 Alert.AlertType.CONFIRMATION,
