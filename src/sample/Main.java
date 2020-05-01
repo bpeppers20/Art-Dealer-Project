@@ -67,7 +67,7 @@ public class Main extends Application {
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(10);
         hbox.setStyle("-fx-background-color: #336699;");
-        // Add hbox to gridPane
+        // Add hbox to gridPane at the bottom
         gridPane.add(hbox, 0, 7, 8,2);
 
         // Data structure to hold images of all cards
@@ -167,8 +167,11 @@ public class Main extends Application {
             imageViews.put("view" + i, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
                     + cards.get(i) + ".png")));
             int finalI = i;
+            // Adds click event handler to place card in hbox
             imageViews.get("view" + i).addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-                hbox.getChildren().add(imageViews.get("view" + finalI));
+                if(hbox.getChildren().size() < 4) {
+                    hbox.getChildren().add(imageViews.get("view" + finalI));
+                }
                 e.consume();
             });
         }
