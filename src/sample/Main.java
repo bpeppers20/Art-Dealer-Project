@@ -136,14 +136,6 @@ public class Main extends Application {
             System.out.println("Random Deal was clicked!");
         });
 
-
-
-        EventHandler handler = (EventHandler<MouseEvent>) event -> {
-
-        };
-
-//        imageViews.get("view0").addEventHandler(MouseEvent.MOUSE_CLICKED, handler);
-
         gridPane.add(randomDealBtn, 9, 0);
         gridPane.add(guessBtn, 9, 1);
         gridPane.add(quitBtn, 9, 2);
