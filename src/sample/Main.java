@@ -120,17 +120,13 @@ public class Main extends Application {
             int numSelected = hbox.getChildren().size();
 
             // ArrayList holding 0-51 to access imageViews indices
-            // Where to Implement Card Class
-           // ArrayList<Integer> list = new ArrayList<Integer>();
-           // for (int k = 0; k < 52; k++) {
-           //     list.add(new Integer(k));
-           // }
-            // Where to implement card class
-            CardClass deckManager = new CardClass(52,"Manager",false,false,false,false,false,false);
-            // Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
-            // Maybe have the shuffle be based on randomly picking a number for class sake
-            // Maybe use something like srand()?
-            ArrayList<CardClass> deck = deckManager.createDeck();
+            // Using list to ensure that each number selected is
+            // unique when being chosen
+            ArrayList<Integer> list = new ArrayList<Integer>();
+            for (int k = 0; k < 52; k++) {
+                list.add(new Integer(k));
+            }
+             Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
 
 
             // Switch cascades to add the appropriate number of
