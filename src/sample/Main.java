@@ -28,12 +28,10 @@ public class Main extends Application {
 
     private Stage mainStage;
 
-    @Override
     public void start(Stage primaryStage) throws Exception{
         this.mainStage = primaryStage;
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
         //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"));
-
         // Fill list with string values used to fetch images
         // in setupCardImageViews()
         ArrayList<String> cards = new ArrayList<>();
@@ -127,17 +125,23 @@ public class Main extends Application {
 
 
             // ArrayList holding 0-51 to access imageViews indices
-            ArrayList<Integer> list = new ArrayList<Integer>();
-            for (int k = 0; k < 52; k++) {
-                list.add(new Integer(k));
-            }
-            Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
+            // Where to Implement Card Class
+           // ArrayList<Integer> list = new ArrayList<Integer>();
+           // for (int k = 0; k < 52; k++) {
+           //     list.add(new Integer(k));
+           // }
+            // Where to implement card class
+            CardClass deckManager = new CardClass(52,"Manager",false,false,false,false,false,false);
+            // Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
+            // Maybe have the shuffle be based on randomly picking a number for class sake
+            // Maybe use something like srand()?
+            ArrayList<CardClass> deck = deckManager.createDeck();
 
             // Now grab 4 'random numbers' from the shuffled list to grab cards
-            ImageView card1 = imageViews.get("view" + list.get(0));
-            ImageView card2 = imageViews.get("view" + list.get(1));
-            ImageView card3 = imageViews.get("view" + list.get(2));
-            ImageView card4 = imageViews.get("view" + list.get(3));
+            ImageView card1 = imageViews.get("view" + deck.get(0).getCardValue());
+            ImageView card2 = imageViews.get("view" + deck.get(1).getCardValue());
+            ImageView card3 = imageViews.get("view" + deck.get(2).getCardValue());
+            ImageView card4 = imageViews.get("view" + deck.get(3).getCardValue());
 
             // Add 4 random cards to selected cards box
             hbox.getChildren().addAll(card1, card2, card3, card4);
