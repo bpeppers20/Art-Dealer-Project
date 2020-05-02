@@ -27,7 +27,13 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
 
+    // Needed public/ global variables
+    public static int diff = 0;
+    public static String selectPattern =""; // Pattern that the cpu will select
+    public static String playerGuess =""; // Player Guess
 
+
+    // Needed public/ global variables
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
 
@@ -100,23 +106,47 @@ public class Main extends Application {
                 primaryStage.fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST))
         );
 
-        // -- Make a Guess --
-        Button guessBtn = new Button("Make a Guess");
-        guessBtn.setOnAction(e -> {
-            // ToDo: Need to add real action
-                // 1. If playing against computer
-                    // a. Show input box for guess
-                    // b.
-                // 2. If playing against Student
-                    // a. Show input box for guess
-                    // b. Once entered, show 'Correct' and 'Wrong' buttons
-                    // c. 2nd player will click one of the buttons
-                        // i. Correct -> Game is over and player won
-                        // ii. Wrong  -> Decrement guess counter, start next turn
+        // Variables for Difficulty and choices
+        // All Guessing Options
+        String [] choices1 = {"All Red", "All Black", "All Same Numbers", "All Kings", "All Jacks", "All Queens", "All Aces",
+                "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Back Same Numbers","All Red Same Numbers",
+                "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"}; // Will Add more after testing
+        // < 7 = k-2; < 20 = 3-5 entire list = 6-8
 
-            // Test output
-            System.out.println("Guess was clicked!");
-        });
+        Button startGame = new Button("Start Game");
+        /*--------------------*/
+        // Drop down menu for guesses
+        ChoiceBox guesses = new ChoiceBox();
+        // Button for Difficulty Choice
+        Button selectDiff = new Button ("Confirm Difficulty");
+        selectDiff.setOnAction(event -> choiceDiff(diff,difficultychoiceBox));
+        gridPane.add(selectDiff, 13, 6);
+
+        for (int i= 0; i < choices1.length; i++)
+        {
+            guesses.getItems().add(choices1[i]);
+        }
+        gridPane.add(guesses, 12, 6);
+        startGame.setOnAction(event -> storePattern(diff, selectPattern, choices1));
+        gridPane.add(startGame, 13, 9);
+        // -- Make a Guess --
+        // ToDo: Need to add real action
+        // 1. If playing against computer
+        // a. Show input box for guess
+        // b.
+        // 2. If playing against Student
+        // a. Show input box for guess
+        // b. Once entered, show 'Correct' and 'Wrong' buttons
+        // c. 2nd player will click one of the buttons
+        // i. Correct -> Game is over and player won
+        // ii. Wrong  -> Decrement guess counter, start next turn
+
+        // Make Answer to be guessed
+
+        // Test output
+        System.out.println(playerGuess);
+        Button guessBtn = new Button("Make a Guess");
+        guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses));
 
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
@@ -165,7 +195,6 @@ public class Main extends Application {
             // ToDo: Still need to re-enable the button once the next turn starts
 
         });
-
         // -- Confirm Deal --
         Button confirmDealBtn = new Button("Confirm Cards to Deal");
         confirmDealBtn.setOnAction(e -> {
@@ -274,6 +303,77 @@ public class Main extends Application {
             event.consume();
         }
     };
+
+    private void choiceDiff(int diff, ChoiceBox <String> difficultychoiceBox)
+    {
+        String choice = difficultychoiceBox.getValue();
+        if (choice.equals("Easy (K-2)"))
+        {
+            diff = 0;
+        }
+        if (choice.equals("Medium (3-5)"))
+        {
+            diff = 1;
+        }
+        if (choice.equals("Hard (6-8)"))
+        {
+            diff = 2;
+        }
+        setDiff(diff);
+    }
+
+    public static void setDiff(int num) // Store Difficulty Number
+    {
+        if (num == 0)
+        {
+            diff = 0;
+        }
+        if (num == 1)
+        {
+            diff = 1;
+        }
+        if (num == 2)
+        {
+            diff = 2;
+        }
+        System.out.println("Diffculty = " + diff);
+    }
+
+    private void storePattern(int diff, String s, String[] choices1) // Cpu selects pattern at random
+    {
+        int upperBound = -1; // Limit Question based on difficulty
+        if (diff == 0)
+            upperBound = 6;
+        if (diff == 1)
+            upperBound = 19;
+        if (diff == 2)
+            upperBound = choices1.length;
+        Random rand = new Random();
+        int index = rand.nextInt(upperBound);
+        s = choices1[index];
+        setPattern(s);
+    }
+
+    public static void setPattern (String s) // Store Pattern Answer
+    {
+        selectPattern = s;
+        System.out.println(selectPattern);
+    }
+    public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses)
+    {
+        selectPattern = s1;
+        playerGuess = guesses.getValue();
+        System.out.println("Guess was clicked!");
+        if (playerGuess.equals(selectPattern))
+        {
+            System.out.println("Your Guess was Correct!");
+        }
+        else{
+            System.out.println("Your Guess was Wrong! Try Again!");
+        }
+        //System.out.println(playerGuess);
+        //System.out.println("pattern = " + selectPattern);
+    }
 
     public static void main(String[] args) {
         launch(args);
