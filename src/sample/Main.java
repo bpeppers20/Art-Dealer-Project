@@ -26,8 +26,8 @@ import javafx.scene.control.Alert.AlertType;
 public class Main extends Application {
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
-    private int guessCounter;
-    private int difficulty;
+    private static int guessCounter;
+    private static int difficulty;
 
     // Difficulty level codes
     public final static int EASY = 0, MEDIUM = 1, HARD = 2;
@@ -202,9 +202,37 @@ public class Main extends Application {
 
         Button confirmDealBtn = new Button("Confirm Selection");
         confirmDealBtn.setOnAction(e -> {
-            a.setAlertType(Alert.AlertType.CONFIRMATION);
-            a.setContentText("Are you sure you want to sell these cards?");
-            a.show();
+            int numSelected = hbox.getChildren().size();
+
+            // If there are 4 cards selected to deal
+            if (numSelected == 4) {
+                a.setAlertType(Alert.AlertType.CONFIRMATION);
+                a.setContentText("Are you sure you want to sell these cards?");
+                Optional<ButtonType> result = a.showAndWait();
+
+                if(!result.isPresent()) {
+                    // Alert is exited, no button has been pressed.
+                    System.out.println("Confirm exited");
+                }
+                else if(result.get() == ButtonType.OK) {
+                    // OK button is pressed
+                    System.out.println("Confirmed!!!");
+
+                    // Logic for the computer to take turn
+                    // -- Maybe have a global boolean that says it's seller's turn and flip it here
+                }
+                else if(result.get() == ButtonType.CANCEL) {
+                    // Cancel button is pressed
+                    System.out.println("Confirm cancelled");
+                }
+            // If there aren't 4 cards selected to deal
+            } else {
+                a.setAlertType(AlertType.INFORMATION);
+                a.setContentText("MUST be 4 cards chosen to deal!");
+                a.show();
+            }
+
+
         });
 
         // -- Reset Deal --
@@ -238,6 +266,8 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        /* * * After UI loads and displays... * * */
+
         // Have user choose difficulty and set ui and counters appropriately
         difficultyDisplay = setupDifficulty();
 
@@ -249,6 +279,8 @@ public class Main extends Application {
         // Set guesses remaining text and add to ui
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
         guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
+
+//        game(primaryStage);
     }
 
     // Maps keys and images together for all 52 cards
@@ -331,7 +363,7 @@ public class Main extends Application {
         //
     }
 
-    public String setupDifficulty() {
+    public static String setupDifficulty() {
         String diffDisplay = "";
 
         Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -376,11 +408,31 @@ public class Main extends Application {
         return diffDisplay;
     }
 
-    public int getGuessCounter() { return guessCounter; }
-    public void setGuessCounter(int guesses) { guessCounter = guesses; }
+    public static int getGuessCounter() { return guessCounter; }
+    public static void setGuessCounter(int guesses) { guessCounter = guesses; }
 
-    public int getDifficulty() { return difficulty; }
-    public void setDifficulty(int diff) { difficulty = diff; }
+    public static int getDifficulty() { return difficulty; }
+    public static void setDifficulty(int diff) { difficulty = diff; }
+
+
+    // Construct to switch turns
+    public static void game(Stage stage, HBox hbox, VBox vbox, GridPane gridPane) {
+        boolean proceed = true;
+
+        System.out.println("Game Started!");
+
+    }
+
+    // The Art Seller -- Human
+    public static void player1Turn() {
+
+    }
+
+    // The Art Dealer/Buyer -- Could be Computer or human
+    public static void player2Turn() {
+
+    }
+
 
     public static void main(String[] args) {
         launch(args);
