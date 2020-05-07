@@ -10,10 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -40,24 +37,6 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
         //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"))
 
-        // Set Difficulty
-        /* ToDo: Need to implement a selection of difficulty at
-                 at start of the game */
-        difficulty = 0; // Set arbitrarily for now
-
-        // Set number of guesses allowed
-        switch(difficulty) {
-            case EASY:
-                guessCounter = 10;
-                break;
-            case MEDIUM:
-                guessCounter = 8;
-                break;
-            case HARD:
-                guessCounter = 6;
-                break;
-        }
-
         /* * * GRID PANE SETUP * * */
         //Creating a Grid Pane
         GridPane gridPane = new GridPane();
@@ -79,6 +58,26 @@ public class Main extends Application {
         gridPane.setStyle("-fx-background-color: GREEN; -fx-font-family: 'Cambria Math';");
         /* * * * * * * * * * * * * */
 
+        // Set Difficulty
+        /* ToDo: Need to implement a selection of difficulty at
+                 at start of the game */
+        // Alert to have user choose Difficulty
+        Alert difficultyAlert = new Alert(AlertType.INFORMATION);
+        //difficultyAlert.set;
+
+        //difficulty = EASY; // Set arbitrarily for now
+        //String difficultyDisplay = setDifficulty();
+        String difficultyDisplay = "";
+
+        /* ToDo: Need to consider how to implement difficulty selection
+         - have different display at start of game?
+         - allow changing in middle of game? */
+
+//        //Label for difficulty
+//        Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
+//        // Add difficulty label to gridPane
+//        gridPane.add(difficultyLabel, 13, 3);
+
         // Current Card section
         HBox hbox = new HBox();
         hbox.setMinHeight(150);
@@ -91,10 +90,9 @@ public class Main extends Application {
         // Guess Counter box
         VBox guessVbox = new VBox();
         Text guessLabel = new Text("Guesses Remaining:");
-        Text guessesRemainingLabel = new Text(String.valueOf(guessCounter));
-        guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
         guessVbox.setStyle("-fx-font-size: 125%; -fx-alignment: center; -fx-border-color: black; -fx-border-width: 2px;" +
                 "-fx-border-radius: 95%;");
+        // We add vbox and the number of guesses remaining after difficulty chosen
 
         // Add guessHbox to gridPane
         gridPane.add(guessVbox, 9,7,2,1);
@@ -106,21 +104,6 @@ public class Main extends Application {
 
         // Add cards to GridPane
         addCards(gridPane, cards);
-
-
-        /* ToDo: Need to consider how to implement difficulty selection
-             - have different display at start of game?
-             - allow changing in middle of game?*/
-        //Label for difficulty
-        Text difficultyLabel = new Text("Difficulty");
-        //Choice box for difficulty
-        ChoiceBox difficultychoiceBox = new ChoiceBox();
-        difficultychoiceBox.getItems().addAll
-                ("Easy (K-2)", "Medium (3-5)", "Hard (6-8)");
-
-        // Add to difficulty choiceBox gridPane
-        gridPane.add(difficultyLabel, 13, 3);
-        gridPane.add(difficultychoiceBox, 13, 4);
 
 
         /* * * * Buttons * * * */
@@ -144,16 +127,24 @@ public class Main extends Application {
                     // c. 2nd player will click one of the buttons
                         // i. Correct -> Game is over and player won
                         // ii. Wrong  -> Decrement guess counter, start next turn
+            Alert a = new Alert(AlertType.WARNING);
+            a.setContentText("0 Guesses remaining! Game Lost!");
 
-            // Decrement global guess counter
-            guessCounter--;
-            // Remove old label
-            guessVbox.getChildren().remove(1);
-            // Create new label
-            Text guessCounterLabel = new Text(String.valueOf(guessCounter));
-            // Add label to guessVbox
-            guessVbox.getChildren().add(1, guessCounterLabel);
-
+            if (guessCounter > 0) {
+                // Decrement global guess counter
+                guessCounter--;
+                // Remove old label
+                guessVbox.getChildren().remove(1);
+                // Create new label
+                Text guessCounterLabel = new Text(String.valueOf(guessCounter));
+                // Add label to guessVbox
+                guessVbox.getChildren().add(1, guessCounterLabel);
+            }
+            if (guessCounter == 0) {
+                // Show game lost alert if guesses are 0
+                a.show();
+                guessBtn.setDisable(true);
+            }
             // Test output
             System.out.println("Guess was clicked!");
         });
@@ -246,6 +237,18 @@ public class Main extends Application {
         primaryStage.setTitle("Art Dealer Game");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        // Have user choose difficulty and set ui and counters appropriately
+        difficultyDisplay = setupDifficulty();
+
+        //Label for difficulty
+        Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
+        // Add difficulty label to gridPane
+        gridPane.add(difficultyLabel, 13, 3);
+
+        // Set guesses remaining text and add to ui
+        Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
+        guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
     }
 
     // Maps keys and images together for all 52 cards
@@ -318,6 +321,66 @@ public class Main extends Application {
             event.consume();
         }
     };
+
+    public static void resetGame() {
+        // Put guesses back to appropriate level
+
+
+        // Randomly select new pattern
+
+        //
+    }
+
+    public String setupDifficulty() {
+        String diffDisplay = "";
+
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Difficulty Level");
+        alert.setHeaderText("Choose the level of Difficulty you'd like to play");
+        alert.setContentText("Choose your option.");
+
+        ButtonType buttonEasy = new ButtonType("Easy");
+        ButtonType buttonMedium = new ButtonType("Medium");
+        ButtonType buttonHard = new ButtonType("Hard");
+
+        alert.getButtonTypes().setAll(buttonEasy, buttonMedium, buttonHard);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonEasy){
+            // ... user chose "Easy"
+            setDifficulty(EASY);
+        } else if (result.get() == buttonMedium) {
+            // ... user chose "Medium"
+            setDifficulty(MEDIUM);
+        } else if (result.get() == buttonHard) {
+            // ... user chose "Hard"
+            setDifficulty(HARD);
+        }
+
+        // Set number of guesses allowed and display for difficulty level
+        switch(getDifficulty()) {
+            case EASY:
+                setGuessCounter(10);
+                diffDisplay = "Easy";
+                break;
+            case MEDIUM:
+                setGuessCounter(8);
+                diffDisplay = "Medium";
+                break;
+            case HARD:
+                setGuessCounter(6);
+                diffDisplay = "Hard";
+                break;
+        }
+
+        return diffDisplay;
+    }
+
+    public int getGuessCounter() { return guessCounter; }
+    public void setGuessCounter(int guesses) { guessCounter = guesses; }
+
+    public int getDifficulty() { return difficulty; }
+    public void setDifficulty(int diff) { difficulty = diff; }
 
     public static void main(String[] args) {
         launch(args);
