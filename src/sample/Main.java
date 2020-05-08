@@ -3,6 +3,7 @@ package sample;
 import java.util.*;
 import java.awt.event.InputEvent;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -10,37 +11,34 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.scene.control.Alert.AlertType;
+import javafx.util.Duration;
 
 public class Main extends Application {
-
-
     // Needed public/ global variables
-    public static int diff = 0;
     public static String selectPattern =""; // Pattern that the cpu will select
     public static String playerGuess =""; // Player Guess
-
-
-    // Needed public/ global variables
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
+    private static int guessCounter;
+    private static int difficulty;
+    private int numOfCardsBought = 0;
+
+    // Difficulty level codes
+    public final static int EASY = 0, MEDIUM = 1, HARD = 2;
 
     public void start(Stage primaryStage) throws Exception{
-        System.out.println("java.version: " + System.getProperty("java.version"));
-        System.out.println("javafx.runtime.version: " + System.getProperty("javafx.runtime.version"));
-
         this.mainStage = primaryStage;
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
         //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"))
@@ -62,8 +60,11 @@ public class Main extends Application {
         //Setting the Grid alignment
         gridPane.setAlignment(Pos.CENTER);
 
-        gridPane.setStyle("-fx-background-color: GREEN;");
+        // GridPane styling
+        gridPane.setStyle("-fx-background-color: GREEN; -fx-font-family: 'Cambria Math';");
         /* * * * * * * * * * * * * */
+
+        String difficultyDisplay = "";
 
         // Current Card section
         HBox hbox = new HBox();
@@ -74,6 +75,16 @@ public class Main extends Application {
         // Add hbox to gridPane at the bottom
         gridPane.add(hbox, 0, 7, 8,2);
 
+        // Guess Counter box
+        VBox guessVbox = new VBox();
+        Text guessLabel = new Text("Guesses Remaining:");
+        guessVbox.setStyle("-fx-font-size: 125%; -fx-alignment: center; -fx-border-color: black; -fx-border-width: 2px;" +
+                "-fx-border-radius: 95%;");
+        // We add vbox and the number of guesses remaining after difficulty chosen
+
+        // Add guessHbox to gridPane
+        gridPane.add(guessVbox, 9,7,2,1);
+
         // Data structure to hold images of all cards
         Map<String, Card> cards = new HashMap<String, Card>();
         // Fill data structure
@@ -81,21 +92,6 @@ public class Main extends Application {
 
         // Add cards to GridPane
         addCards(gridPane, cards);
-
-
-        /* ToDo: Need to consider how to implement difficulty selection
-             - have different display at start of game?
-             - allow changing in middle of game?*/
-        //Label for difficulty
-        Text difficultyLabel = new Text("Difficulty");
-        //Choice box for difficulty
-        ChoiceBox difficultychoiceBox = new ChoiceBox();
-        difficultychoiceBox.getItems().addAll
-                ("Easy (K-2)", "Medium (3-5)", "Hard (6-8)");
-
-        // Add to difficulty choiceBox gridPane
-        gridPane.add(difficultyLabel, 13, 3);
-        gridPane.add(difficultychoiceBox, 13, 4);
 
 
         /* * * * Buttons * * * */
@@ -113,21 +109,17 @@ public class Main extends Application {
                 "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"}; // Will Add more after testing
         // < 7 = k-2; < 20 = 3-5 entire list = 6-8
 
-        Button startGame = new Button("Start Game");
-        /*--------------------*/
         // Drop down menu for guesses
         ChoiceBox guesses = new ChoiceBox();
-        // Button for Difficulty Choice
-        Button selectDiff = new Button ("Confirm Difficulty");
-        selectDiff.setOnAction(event -> choiceDiff(diff,difficultychoiceBox));
-        gridPane.add(selectDiff, 13, 6);
-
         for (int i= 0; i < choices1.length; i++)
         {
             guesses.getItems().add(choices1[i]);
         }
         gridPane.add(guesses, 12, 6);
-        startGame.setOnAction(event -> storePattern(diff, selectPattern, choices1));
+      
+        // Start Game button: stores randomly selected pattern for this game 
+        Button startGame = new Button("Start Game");
+        startGame.setOnAction(event -> storePattern(choices1));
         gridPane.add(startGame, 13, 9);
         // -- Make a Guess --
         // ToDo: Need to add real action
@@ -146,7 +138,8 @@ public class Main extends Application {
         // Test output
         System.out.println(playerGuess);
         Button guessBtn = new Button("Make a Guess");
-        guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses));
+
+        guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses, guessVbox, guessBtn));
 
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
@@ -162,7 +155,6 @@ public class Main extends Application {
                 list.add(new Integer(k));
             }
              Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
-
 
             // Switch cascades to add the appropriate number of
             // randomly selected cards depending on how many are
@@ -195,29 +187,138 @@ public class Main extends Application {
             // ToDo: Still need to re-enable the button once the next turn starts
 
         });
-        // -- Confirm Deal --
-        Button confirmDealBtn = new Button("Confirm Cards to Deal");
-        confirmDealBtn.setOnAction(e -> {
-
-        });
 
         // -- Reset Deal --
         Button resetDealBtn = new Button("Reset Cards");
         resetDealBtn.setOnAction(e -> {
-            int numSelected = hbox.getChildren().size();
-            Card curCard;
+            resetEvent(hbox, gridPane, randomDealBtn);
+        });
 
-            for(int i = 0; i < numSelected; i++) {
-                curCard = selectedCards[i];
-                gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
+        // -- Confirm Deal --
+        // create an alert
+        Alert a = new Alert(Alert.AlertType.NONE);
+
+        Button confirmDealBtn = new Button("Confirm Selection");
+        confirmDealBtn.setOnAction(e -> {
+            int numSelected = hbox.getChildren().size();
+
+            // If there are 4 cards selected to deal
+            if (numSelected == 4) {
+                a.setAlertType(Alert.AlertType.CONFIRMATION);
+                a.setContentText("Are you sure you want to sell these cards?");
+                Optional<ButtonType> result = a.showAndWait();
+
+                if(!result.isPresent()) {
+                    // Alert is exited, no button has been pressed.
+                    System.out.println("Confirm exited");
+                }
+                // Deal Confirmed
+                else if(result.get() == ButtonType.OK) {
+                    // OK button is pressed
+                    System.out.println("Confirmed!!!");
+
+                    Card boughtCards[] = new Card[4];
+
+                    // Logic for the computer to take turn
+                    // -- Maybe have a global boolean that says it's seller's turn and flip it here
+
+                    Alert selectCards = new Alert(AlertType.CONFIRMATION);
+                    selectCards.setTitle("Cards that are Dealt");
+                    selectCards.setHeaderText("Choose the 'paintings' to buy.");
+                    selectCards.setContentText("Choose your 'paintings'.");
+                    // Toggle buttons to choose which cards to buy
+                    ToggleButton toggle1 = new ToggleButton();
+                    ToggleButton toggle2 = new ToggleButton();
+                    ToggleButton toggle3 = new ToggleButton();
+                    ToggleButton toggle4 = new ToggleButton();
+                    // Grab currently selected/dealt cards
+                    Card card1 = selectedCards[0];
+                    Card card2 = selectedCards[1];
+                    Card card3 = selectedCards[2];
+                    Card card4 = selectedCards[3];
+                    // Add image of cards selected to toggle buttons
+                    toggle1.setStyle("-fx-graphic: url('" + card1.getImageUrl() + "')");
+                    toggle2.setStyle("-fx-graphic: url('" + card2.getImageUrl() + "')");
+                    toggle3.setStyle("-fx-graphic: url('" + card3.getImageUrl() + "')");
+                    toggle4.setStyle("-fx-graphic: url('" + card4.getImageUrl() + "')");
+                    // Set size of each toggle button
+                    toggle1.setMinSize(125, 150);
+                    toggle1.setMaxSize(125, 150);
+                    toggle2.setMinSize(125, 150);
+                    toggle2.setMaxSize(125, 150);
+                    toggle3.setMinSize(125, 150);
+                    toggle3.setMaxSize(125, 150);
+                    toggle4.setMinSize(125, 150);
+                    toggle4.setMaxSize(125, 150);
+
+                    // Setup new window to choose cards to buy / show bought cards
+                    final Stage dialog = new Stage();
+                    dialog.initModality(Modality.APPLICATION_MODAL);
+                    dialog.initOwner(primaryStage);
+
+                    HBox dialogHbox = new HBox(20);
+                    dialogHbox.getChildren().addAll(toggle1, toggle2, toggle3, toggle4);
+
+                    // Confirm Buy Button
+                    Button confirmBuyBtn = new Button("Purchase Selected 'Paintings'");
+                    confirmBuyBtn.setOnAction(e2 -> {
+                        numOfCardsBought = 0;
+                        // Add text
+                        Text message = new Text("These were the cards purchased!!");
+                        message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
+                        dialogHbox.getChildren().add(message);
+                        // Place bought card images in dialogHbox
+                        if(toggle1.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+                        if(toggle2.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+                        if(toggle3.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+                        if(toggle4.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+
+                        // Remove toggle buttons
+                        dialogHbox.getChildren().removeAll(toggle1, toggle2, toggle3, toggle4);
+                        // Remove confirmBuyBtn
+                        dialogHbox.getChildren().remove(confirmBuyBtn);
+                        // Close stage after x amount of time
+                        PauseTransition delay = new PauseTransition(Duration.seconds(5));
+                        delay.setOnFinished( event -> dialog.close() );
+                        delay.play();
+                        // Reset cards
+                        resetEvent(hbox, gridPane, randomDealBtn);
+                    });
+                    // Add confirmBuyBtn to dialogHbox
+                    dialogHbox.getChildren().add(confirmBuyBtn);
+
+                    Scene dialogScene = new Scene(dialogHbox, 800, 200);
+                    dialog.setScene(dialogScene);
+                    dialog.show();
+
+                }
+                // Deal cancelled
+                else if(result.get() == ButtonType.CANCEL) {
+                    // Cancel button is pressed
+                    System.out.println("Confirm cancelled");
+                }
+            // If there aren't 4 cards selected to deal
+            } else {
+                a.setAlertType(AlertType.INFORMATION);
+                a.setContentText("MUST be 4 cards chosen to deal!");
+                a.show();
             }
 
-            // Clear Selected Cards array
-            Arrays.fill(selectedCards, null);
 
-            // Reset random deal button since all cards deselected
-            randomDealBtn.setDisable(false);
         });
+
 
         // Add buttons to GridPane
         gridPane.add(randomDealBtn, 13, 0);
@@ -231,6 +332,22 @@ public class Main extends Application {
         primaryStage.setTitle("Art Dealer Game");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        /* * * After UI loads and displays... * * */
+
+        // Have user choose difficulty and set ui and counters appropriately
+        difficultyDisplay = setupDifficulty();
+
+        //Label for difficulty
+        Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
+        // Add difficulty label to gridPane
+        gridPane.add(difficultyLabel, 13, 3);
+
+        // Set guesses remaining text and add to ui
+        Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
+        guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
+
+//        game(primaryStage);
     }
 
     // Maps keys and images together for all 52 cards
@@ -241,7 +358,8 @@ public class Main extends Application {
         // Creating Map of Card Objects
         for (int k = 0; k < 52; k++) {
             cards.put("card" + k, new Card(i + 1, j, i, j, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
-                    + (k + 1) + ".png"))));
+                    + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
+                    + (k + 1) + ".png"));
             //
             if((i % 12) == 0 && i != 0) {
                 j++;
@@ -284,6 +402,22 @@ public class Main extends Application {
         }
     }
 
+    public void resetEvent(HBox hbox, GridPane gridPane, Button randomDealBtn) {
+        int numSelected = hbox.getChildren().size();
+        Card curCard;
+
+        for(int i = 0; i < numSelected; i++) {
+            curCard = selectedCards[i];
+            gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
+        }
+
+        // Clear Selected Cards array
+        Arrays.fill(selectedCards, null);
+
+        // Reset random deal button since all cards deselected
+        randomDealBtn.setDisable(false);
+    };
+
     // Display alert to confirm user wants to close app
     private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
         Alert closeConfirmation = new Alert(
@@ -304,76 +438,120 @@ public class Main extends Application {
         }
     };
 
-    private void choiceDiff(int diff, ChoiceBox <String> difficultychoiceBox)
-    {
-        String choice = difficultychoiceBox.getValue();
-        if (choice.equals("Easy (K-2)"))
-        {
-            diff = 0;
-        }
-        if (choice.equals("Medium (3-5)"))
-        {
-            diff = 1;
-        }
-        if (choice.equals("Hard (6-8)"))
-        {
-            diff = 2;
-        }
-        setDiff(diff);
-    }
 
-    public static void setDiff(int num) // Store Difficulty Number
-    {
-        if (num == 0)
-        {
-            diff = 0;
-        }
-        if (num == 1)
-        {
-            diff = 1;
-        }
-        if (num == 2)
-        {
-            diff = 2;
-        }
-        System.out.println("Diffculty = " + diff);
-    }
-
-    private void storePattern(int diff, String s, String[] choices1) // Cpu selects pattern at random
+    // Was sending in global variables, just need to access them no need to use as arguments
+    private void storePattern(String[] choices1) // Cpu selects pattern at random
     {
         int upperBound = -1; // Limit Question based on difficulty
-        if (diff == 0)
+        if (difficulty == 0)
             upperBound = 6;
-        if (diff == 1)
+        if (difficulty == 1)
             upperBound = 19;
-        if (diff == 2)
+        if (difficulty == 2)
             upperBound = choices1.length;
         Random rand = new Random();
         int index = rand.nextInt(upperBound);
-        s = choices1[index];
-        setPattern(s);
-    }
-
-    public static void setPattern (String s) // Store Pattern Answer
-    {
-        selectPattern = s;
+        selectPattern = choices1[index];
         System.out.println(selectPattern);
     }
-    public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses)
+
+    public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses, VBox guessVbox, Button guessBtn)
     {
         selectPattern = s1;
         playerGuess = guesses.getValue();
         System.out.println("Guess was clicked!");
+      
+        // Alert if the player has used all guesses
+        Alert a = new Alert(AlertType.WARNING);
+        a.setContentText("0 Guesses remaining! Game Lost!");
+      
         if (playerGuess.equals(selectPattern))
         {
             System.out.println("Your Guess was Correct!");
         }
         else{
             System.out.println("Your Guess was Wrong! Try Again!");
+          
+            if (guessCounter > 0) {
+                // Decrement global guess counter
+                guessCounter--;
+                // Remove old label
+                guessVbox.getChildren().remove(1);
+                // Create new label
+                Text guessCounterLabel = new Text(String.valueOf(guessCounter));
+                // Add label to guessVbox
+                guessVbox.getChildren().add(1, guessCounterLabel);
+            }
+            if (guessCounter == 0) {
+                // Show game lost alert if guesses are 0
+                a.show();
+                guessBtn.setDisable(true);
+            }
         }
         //System.out.println(playerGuess);
         //System.out.println("pattern = " + selectPattern);
     }
+
+=======
+    public static void resetGame() {
+        // Put guesses back to appropriate level
+
+
+        // Randomly select new pattern
+
+        //
+    }
+
+    public static String setupDifficulty() {
+        String diffDisplay = "";
+
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Difficulty Level");
+        alert.setHeaderText("Choose the level of Difficulty you'd like to play");
+        alert.setContentText("Choose your option.");
+
+        ButtonType buttonEasy = new ButtonType("Easy");
+        ButtonType buttonMedium = new ButtonType("Medium");
+        ButtonType buttonHard = new ButtonType("Hard");
+
+        alert.getButtonTypes().setAll(buttonEasy, buttonMedium, buttonHard);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonEasy){
+            // ... user chose "Easy"
+            setDifficulty(EASY);
+        } else if (result.get() == buttonMedium) {
+            // ... user chose "Medium"
+            setDifficulty(MEDIUM);
+        } else if (result.get() == buttonHard) {
+            // ... user chose "Hard"
+            setDifficulty(HARD);
+        }
+
+        // Set number of guesses allowed and display for difficulty level
+        switch(getDifficulty()) {
+            case EASY:
+                setGuessCounter(10);
+                diffDisplay = "Easy";
+                break;
+            case MEDIUM:
+                setGuessCounter(8);
+                diffDisplay = "Medium";
+                break;
+            case HARD:
+                setGuessCounter(6);
+                diffDisplay = "Hard";
+                break;
+        }
+
+        return diffDisplay;
+    }
+
+    public static int getGuessCounter() { return guessCounter; }
+    public static void setGuessCounter(int guesses) { guessCounter = guesses; }
+
+    public static int getDifficulty() { return difficulty; }
+    public static void setDifficulty(int diff) { difficulty = diff; }
 
     public static void main(String[] args) {
         launch(args);
