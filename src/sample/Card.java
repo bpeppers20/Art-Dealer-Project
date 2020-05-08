@@ -31,7 +31,9 @@ public class Card extends Node {
 
     private final ImageView image;
 
-    public Card(int theValue, int theSuit, int x, int y, ImageView image) {
+    private final String imageUrl;
+
+    public Card(int theValue, int theSuit, int x, int y, ImageView image, String imageUrl) {
         // Construct a card with the specified value and suit.
         // Value must be between 1 and 13.  Suit must be between
         // 0 and 3.  If the parameters are outside these ranges,
@@ -41,6 +43,7 @@ public class Card extends Node {
         this.xPos = x;
         this.yPos = y;
         this.image = image;
+        this.imageUrl = imageUrl;
     }
 
     // Return the int that codes for this card's suit.
@@ -53,6 +56,7 @@ public class Card extends Node {
     public int getYPos() { return this.yPos; }
     // Return associated image for card
     public ImageView getImage() { return this.image; }
+    public String getImageUrl() { return this.imageUrl; }
 
     public String getSuitAsString() {
         // Return a String representing the card's suit.
