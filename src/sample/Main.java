@@ -26,6 +26,9 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.util.Duration;
 
 public class Main extends Application {
+    // Needed public/ global variables
+    public static String selectPattern =""; // Pattern that the cpu will select
+    public static String playerGuess =""; // Player Guess
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
     private static int guessCounter;
@@ -61,25 +64,7 @@ public class Main extends Application {
         gridPane.setStyle("-fx-background-color: GREEN; -fx-font-family: 'Cambria Math';");
         /* * * * * * * * * * * * * */
 
-        // Set Difficulty
-        /* ToDo: Need to implement a selection of difficulty at
-                 at start of the game */
-        // Alert to have user choose Difficulty
-        Alert difficultyAlert = new Alert(AlertType.INFORMATION);
-        //difficultyAlert.set;
-
-        //difficulty = EASY; // Set arbitrarily for now
-        //String difficultyDisplay = setDifficulty();
         String difficultyDisplay = "";
-
-        /* ToDo: Need to consider how to implement difficulty selection
-         - have different display at start of game?
-         - allow changing in middle of game? */
-
-//        //Label for difficulty
-//        Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
-//        // Add difficulty label to gridPane
-//        gridPane.add(difficultyLabel, 13, 3);
 
         // Current Card section
         HBox hbox = new HBox();
@@ -117,41 +102,44 @@ public class Main extends Application {
                 primaryStage.fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST))
         );
 
+        // Variables for Difficulty and choices
+        // All Guessing Options
+        String [] choices1 = {"All Red", "All Black", "All Same Numbers", "All Kings", "All Jacks", "All Queens", "All Aces",
+                "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Back Same Numbers","All Red Same Numbers",
+                "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"}; // Will Add more after testing
+        // < 7 = k-2; < 20 = 3-5 entire list = 6-8
+
+        // Drop down menu for guesses
+        ChoiceBox guesses = new ChoiceBox();
+        for (int i= 0; i < choices1.length; i++)
+        {
+            guesses.getItems().add(choices1[i]);
+        }
+        gridPane.add(guesses, 12, 6);
+      
+        // Start Game button: stores randomly selected pattern for this game 
+        Button startGame = new Button("Start Game");
+        startGame.setOnAction(event -> storePattern(choices1));
+        gridPane.add(startGame, 13, 9);
         // -- Make a Guess --
+        // ToDo: Need to add real action
+        // 1. If playing against computer
+        // a. Show input box for guess
+        // b.
+        // 2. If playing against Student
+        // a. Show input box for guess
+        // b. Once entered, show 'Correct' and 'Wrong' buttons
+        // c. 2nd player will click one of the buttons
+        // i. Correct -> Game is over and player won
+        // ii. Wrong  -> Decrement guess counter, start next turn
+
+        // Make Answer to be guessed
+
+        // Test output
+        System.out.println(playerGuess);
         Button guessBtn = new Button("Make a Guess");
-        guessBtn.setOnAction(e -> {
-            // ToDo: Need to add real action
-                // 1. If playing against computer
-                    // a. Show input box for guess
-                    // b.
-                // 2. If playing against Student
-                    // a. Show input box for guess
-                    // b. Once entered, show 'Correct' and 'Wrong' buttons
-                    // c. 2nd player will click one of the buttons
-                        // i. Correct -> Game is over and player won
-                        // ii. Wrong  -> Decrement guess counter, start next turn
 
-            Alert a = new Alert(AlertType.WARNING);
-            a.setContentText("0 Guesses remaining! Game Lost!");
-
-            if (guessCounter > 0) {
-                // Decrement global guess counter
-                guessCounter--;
-                // Remove old label
-                guessVbox.getChildren().remove(1);
-                // Create new label
-                Text guessCounterLabel = new Text(String.valueOf(guessCounter));
-                // Add label to guessVbox
-                guessVbox.getChildren().add(1, guessCounterLabel);
-            }
-            if (guessCounter == 0) {
-                // Show game lost alert if guesses are 0
-                a.show();
-                guessBtn.setDisable(true);
-            }
-            // Test output
-            System.out.println("Guess was clicked!");
-        });
+        guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses, guessVbox, guessBtn));
 
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
@@ -201,25 +189,6 @@ public class Main extends Application {
         });
 
         // -- Reset Deal --
-//        public void resetEventHandler() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                int numSelected = hbox.getChildren().size();
-//                Card curCard;
-//
-//                for(int i = 0; i < numSelected; i++) {
-//                    curCard = selectedCards[i];
-//                    gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
-//                }
-//
-//                // Clear Selected Cards array
-//                Arrays.fill(selectedCards, null);
-//
-//                // Reset random deal button since all cards deselected
-//                randomDealBtn.setDisable(false);
-//            }
-//        };
-
         Button resetDealBtn = new Button("Reset Cards");
         resetDealBtn.setOnAction(e -> {
             resetEvent(hbox, gridPane, randomDealBtn);
@@ -469,6 +438,61 @@ public class Main extends Application {
         }
     };
 
+
+    // Was sending in global variables, just need to access them no need to use as arguments
+    private void storePattern(String[] choices1) // Cpu selects pattern at random
+    {
+        int upperBound = -1; // Limit Question based on difficulty
+        if (difficulty == 0)
+            upperBound = 6;
+        if (difficulty == 1)
+            upperBound = 19;
+        if (difficulty == 2)
+            upperBound = choices1.length;
+        Random rand = new Random();
+        int index = rand.nextInt(upperBound);
+        selectPattern = choices1[index];
+        System.out.println(selectPattern);
+    }
+
+    public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses, VBox guessVbox, Button guessBtn)
+    {
+        selectPattern = s1;
+        playerGuess = guesses.getValue();
+        System.out.println("Guess was clicked!");
+      
+        // Alert if the player has used all guesses
+        Alert a = new Alert(AlertType.WARNING);
+        a.setContentText("0 Guesses remaining! Game Lost!");
+      
+        if (playerGuess.equals(selectPattern))
+        {
+            System.out.println("Your Guess was Correct!");
+        }
+        else{
+            System.out.println("Your Guess was Wrong! Try Again!");
+          
+            if (guessCounter > 0) {
+                // Decrement global guess counter
+                guessCounter--;
+                // Remove old label
+                guessVbox.getChildren().remove(1);
+                // Create new label
+                Text guessCounterLabel = new Text(String.valueOf(guessCounter));
+                // Add label to guessVbox
+                guessVbox.getChildren().add(1, guessCounterLabel);
+            }
+            if (guessCounter == 0) {
+                // Show game lost alert if guesses are 0
+                a.show();
+                guessBtn.setDisable(true);
+            }
+        }
+        //System.out.println(playerGuess);
+        //System.out.println("pattern = " + selectPattern);
+    }
+
+=======
     public static void resetGame() {
         // Put guesses back to appropriate level
 
@@ -528,26 +552,6 @@ public class Main extends Application {
 
     public static int getDifficulty() { return difficulty; }
     public static void setDifficulty(int diff) { difficulty = diff; }
-
-
-    // Construct to switch turns
-    public static void game(Stage stage, HBox hbox, VBox vbox, GridPane gridPane) {
-        boolean proceed = true;
-
-        System.out.println("Game Started!");
-
-    }
-
-    // The Art Seller -- Human
-    public static void player1Turn() {
-
-    }
-
-    // The Art Dealer/Buyer -- Could be Computer or human
-    public static void player2Turn() {
-
-    }
-
 
     public static void main(String[] args) {
         launch(args);
