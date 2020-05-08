@@ -3,6 +3,7 @@ package sample;
 import java.util.*;
 import java.awt.event.InputEvent;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -22,12 +23,14 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.control.Alert.AlertType;
+import javafx.util.Duration;
 
 public class Main extends Application {
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
     private static int guessCounter;
     private static int difficulty;
+    private int numOfCardsBought = 0;
 
     // Difficulty level codes
     public final static int EASY = 0, MEDIUM = 1, HARD = 2;
@@ -127,6 +130,7 @@ public class Main extends Application {
                     // c. 2nd player will click one of the buttons
                         // i. Correct -> Game is over and player won
                         // ii. Wrong  -> Decrement guess counter, start next turn
+
             Alert a = new Alert(AlertType.WARNING);
             a.setContentText("0 Guesses remaining! Game Lost!");
 
@@ -196,6 +200,31 @@ public class Main extends Application {
 
         });
 
+        // -- Reset Deal --
+//        public void resetEventHandler() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                int numSelected = hbox.getChildren().size();
+//                Card curCard;
+//
+//                for(int i = 0; i < numSelected; i++) {
+//                    curCard = selectedCards[i];
+//                    gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
+//                }
+//
+//                // Clear Selected Cards array
+//                Arrays.fill(selectedCards, null);
+//
+//                // Reset random deal button since all cards deselected
+//                randomDealBtn.setDisable(false);
+//            }
+//        };
+
+        Button resetDealBtn = new Button("Reset Cards");
+        resetDealBtn.setOnAction(e -> {
+            resetEvent(hbox, gridPane, randomDealBtn);
+        });
+
         // -- Confirm Deal --
         // create an alert
         Alert a = new Alert(Alert.AlertType.NONE);
@@ -214,13 +243,99 @@ public class Main extends Application {
                     // Alert is exited, no button has been pressed.
                     System.out.println("Confirm exited");
                 }
+                // Deal Confirmed
                 else if(result.get() == ButtonType.OK) {
                     // OK button is pressed
                     System.out.println("Confirmed!!!");
 
+                    Card boughtCards[] = new Card[4];
+
                     // Logic for the computer to take turn
                     // -- Maybe have a global boolean that says it's seller's turn and flip it here
+
+                    Alert selectCards = new Alert(AlertType.CONFIRMATION);
+                    selectCards.setTitle("Cards that are Dealt");
+                    selectCards.setHeaderText("Choose the 'paintings' to buy.");
+                    selectCards.setContentText("Choose your 'paintings'.");
+                    // Toggle buttons to choose which cards to buy
+                    ToggleButton toggle1 = new ToggleButton();
+                    ToggleButton toggle2 = new ToggleButton();
+                    ToggleButton toggle3 = new ToggleButton();
+                    ToggleButton toggle4 = new ToggleButton();
+                    // Grab currently selected/dealt cards
+                    Card card1 = selectedCards[0];
+                    Card card2 = selectedCards[1];
+                    Card card3 = selectedCards[2];
+                    Card card4 = selectedCards[3];
+                    // Add image of cards selected to toggle buttons
+                    toggle1.setStyle("-fx-graphic: url('" + card1.getImageUrl() + "')");
+                    toggle2.setStyle("-fx-graphic: url('" + card2.getImageUrl() + "')");
+                    toggle3.setStyle("-fx-graphic: url('" + card3.getImageUrl() + "')");
+                    toggle4.setStyle("-fx-graphic: url('" + card4.getImageUrl() + "')");
+                    // Set size of each toggle button
+                    toggle1.setMinSize(125, 150);
+                    toggle1.setMaxSize(125, 150);
+                    toggle2.setMinSize(125, 150);
+                    toggle2.setMaxSize(125, 150);
+                    toggle3.setMinSize(125, 150);
+                    toggle3.setMaxSize(125, 150);
+                    toggle4.setMinSize(125, 150);
+                    toggle4.setMaxSize(125, 150);
+
+                    // Setup new window to choose cards to buy / show bought cards
+                    final Stage dialog = new Stage();
+                    dialog.initModality(Modality.APPLICATION_MODAL);
+                    dialog.initOwner(primaryStage);
+
+                    HBox dialogHbox = new HBox(20);
+                    dialogHbox.getChildren().addAll(toggle1, toggle2, toggle3, toggle4);
+
+                    // Confirm Buy Button
+                    Button confirmBuyBtn = new Button("Purchase Selected 'Paintings'");
+                    confirmBuyBtn.setOnAction(e2 -> {
+                        numOfCardsBought = 0;
+                        // Add text
+                        Text message = new Text("These were the cards purchased!!");
+                        message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
+                        dialogHbox.getChildren().add(message);
+                        // Place bought card images in dialogHbox
+                        if(toggle1.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+                        if(toggle2.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+                        if(toggle3.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+                        if(toggle4.isSelected()) {
+                            dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                            numOfCardsBought++;
+                        }
+
+                        // Remove toggle buttons
+                        dialogHbox.getChildren().removeAll(toggle1, toggle2, toggle3, toggle4);
+                        // Remove confirmBuyBtn
+                        dialogHbox.getChildren().remove(confirmBuyBtn);
+                        // Close stage after x amount of time
+                        PauseTransition delay = new PauseTransition(Duration.seconds(5));
+                        delay.setOnFinished( event -> dialog.close() );
+                        delay.play();
+                        // Reset cards
+                        resetEvent(hbox, gridPane, randomDealBtn);
+                    });
+                    // Add confirmBuyBtn to dialogHbox
+                    dialogHbox.getChildren().add(confirmBuyBtn);
+
+                    Scene dialogScene = new Scene(dialogHbox, 800, 200);
+                    dialog.setScene(dialogScene);
+                    dialog.show();
+
                 }
+                // Deal cancelled
                 else if(result.get() == ButtonType.CANCEL) {
                     // Cancel button is pressed
                     System.out.println("Confirm cancelled");
@@ -235,23 +350,6 @@ public class Main extends Application {
 
         });
 
-        // -- Reset Deal --
-        Button resetDealBtn = new Button("Reset Cards");
-        resetDealBtn.setOnAction(e -> {
-            int numSelected = hbox.getChildren().size();
-            Card curCard;
-
-            for(int i = 0; i < numSelected; i++) {
-                curCard = selectedCards[i];
-                gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
-            }
-
-            // Clear Selected Cards array
-            Arrays.fill(selectedCards, null);
-
-            // Reset random deal button since all cards deselected
-            randomDealBtn.setDisable(false);
-        });
 
         // Add buttons to GridPane
         gridPane.add(randomDealBtn, 13, 0);
@@ -291,7 +389,8 @@ public class Main extends Application {
         // Creating Map of Card Objects
         for (int k = 0; k < 52; k++) {
             cards.put("card" + k, new Card(i + 1, j, i, j, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
-                    + (k + 1) + ".png"))));
+                    + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
+                    + (k + 1) + ".png"));
             //
             if((i % 12) == 0 && i != 0) {
                 j++;
@@ -333,6 +432,22 @@ public class Main extends Application {
             }
         }
     }
+
+    public void resetEvent(HBox hbox, GridPane gridPane, Button randomDealBtn) {
+        int numSelected = hbox.getChildren().size();
+        Card curCard;
+
+        for(int i = 0; i < numSelected; i++) {
+            curCard = selectedCards[i];
+            gridPane.add(curCard.getImage(), curCard.getXPos(), curCard.getYPos());
+        }
+
+        // Clear Selected Cards array
+        Arrays.fill(selectedCards, null);
+
+        // Reset random deal button since all cards deselected
+        randomDealBtn.setDisable(false);
+    };
 
     // Display alert to confirm user wants to close app
     private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
