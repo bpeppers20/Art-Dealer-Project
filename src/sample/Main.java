@@ -102,7 +102,7 @@ public class Main extends Application {
                 primaryStage.fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST))
         );
 
-        // Variables for Difficulty and choices
+        // Variables for Choices
         // All Guessing Options
         String [] choices1 = {"All Red", "All Black", "All Same Numbers", "All Kings", "All Jacks", "All Queens", "All Aces",
                 "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Back Same Numbers","All Red Same Numbers",
@@ -492,7 +492,6 @@ public class Main extends Application {
         //System.out.println("pattern = " + selectPattern);
     }
 
-=======
     public static void resetGame() {
         // Put guesses back to appropriate level
 
@@ -508,7 +507,9 @@ public class Main extends Application {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Difficulty Level");
         alert.setHeaderText("Choose the level of Difficulty you'd like to play");
-        alert.setContentText("Choose your option.");
+        alert.setContentText("Choose your option. AFTER you've selected your difficulty" +
+                " press the 'Start Game' button in the bottom right corner of the main" +
+                " screen. This will select the pattern for you to figure out!");
 
         ButtonType buttonEasy = new ButtonType("Easy");
         ButtonType buttonMedium = new ButtonType("Medium");
