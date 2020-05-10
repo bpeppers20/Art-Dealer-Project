@@ -34,6 +34,7 @@ public class Main extends Application {
     private static int guessCounter;
     private static int difficulty;
     private int numOfCardsBought = 0;
+    private static boolean isTwoPlayer = false;
 
     // Difficulty level codes
     public final static int EASY = 0, MEDIUM = 1, HARD = 2;
@@ -553,6 +554,9 @@ public class Main extends Application {
 
     public static int getDifficulty() { return difficulty; }
     public static void setDifficulty(int diff) { difficulty = diff; }
+
+    public static boolean getIsTwoPlayer() { return isTwoPlayer; }
+    public static void setIsTwoPlayer(boolean twoPlayer) { isTwoPlayer = twoPlayer; }
 
     public static void main(String[] args) {
         launch(args);
