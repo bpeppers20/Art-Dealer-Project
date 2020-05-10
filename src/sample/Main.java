@@ -528,6 +528,28 @@ public class Main extends Application {
         } else if (result.get() == buttonHard) {
             // ... user chose "Hard"
             setDifficulty(HARD);
+            // Give user option of 2 or 1 Player for Hard
+            alert.setTitle("Number of Players");
+            alert.setHeaderText("Choose how many Players will participate");
+            alert.setContentText("Choose your option: One or Two Players. Remember to press" +
+                    "'Start Game' after selecting!");
+
+            ButtonType buttonOnePlayer = new ButtonType("One Player");
+            ButtonType buttonTwoPlayer = new ButtonType("Two Players");
+
+            // Remove difficulty choice buttons
+            alert.getButtonTypes().removeAll(buttonEasy, buttonMedium, buttonHard);
+            // Add Number of Players choice buttons
+            alert.getButtonTypes().setAll(buttonOnePlayer, buttonTwoPlayer);
+
+            Optional<ButtonType> playerResult = alert.showAndWait();
+            // Two Players if chosen
+            if (result.get() == buttonTwoPlayer) {
+                setIsTwoPlayer(true);
+            // One Player if chosen or box exited
+            } else {
+                setIsTwoPlayer(false);
+            }
         }
 
         // Set number of guesses allowed and display for difficulty level
