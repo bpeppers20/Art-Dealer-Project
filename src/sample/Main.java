@@ -220,40 +220,37 @@ public class Main extends Application {
 
                     Card boughtCards[] = new Card[4];
 
-                    // Logic for the computer to take turn
-                    // -- Maybe have a global boolean that says it's seller's turn and flip it here
+                    // If Two Players setup and show card selection box to buy cards
+                    if (getIsTwoPlayer()) {
+                        Alert selectCards = new Alert(AlertType.CONFIRMATION);
+                        selectCards.setTitle("Cards that are Dealt");
+                        selectCards.setHeaderText("Choose the 'paintings' to buy.");
+                        selectCards.setContentText("Choose your 'paintings'.");
+                        // Toggle buttons to choose which cards to buy
+                        ToggleButton toggle1 = new ToggleButton();
+                        ToggleButton toggle2 = new ToggleButton();
+                        ToggleButton toggle3 = new ToggleButton();
+                        ToggleButton toggle4 = new ToggleButton();
+                        // Grab currently selected/dealt cards
+                        Card card1 = selectedCards[0];
+                        Card card2 = selectedCards[1];
+                        Card card3 = selectedCards[2];
+                        Card card4 = selectedCards[3];
+                        // Add image of cards selected to toggle buttons
+                        toggle1.setStyle("-fx-graphic: url('" + card1.getImageUrl() + "')");
+                        toggle2.setStyle("-fx-graphic: url('" + card2.getImageUrl() + "')");
+                        toggle3.setStyle("-fx-graphic: url('" + card3.getImageUrl() + "')");
+                        toggle4.setStyle("-fx-graphic: url('" + card4.getImageUrl() + "')");
+                        // Set size of each toggle button
+                        toggle1.setMinSize(125, 150);
+                        toggle1.setMaxSize(125, 150);
+                        toggle2.setMinSize(125, 150);
+                        toggle2.setMaxSize(125, 150);
+                        toggle3.setMinSize(125, 150);
+                        toggle3.setMaxSize(125, 150);
+                        toggle4.setMinSize(125, 150);
+                        toggle4.setMaxSize(125, 150);
 
-                    Alert selectCards = new Alert(AlertType.CONFIRMATION);
-                    selectCards.setTitle("Cards that are Dealt");
-                    selectCards.setHeaderText("Choose the 'paintings' to buy.");
-                    selectCards.setContentText("Choose your 'paintings'.");
-                    // Toggle buttons to choose which cards to buy
-                    ToggleButton toggle1 = new ToggleButton();
-                    ToggleButton toggle2 = new ToggleButton();
-                    ToggleButton toggle3 = new ToggleButton();
-                    ToggleButton toggle4 = new ToggleButton();
-                    // Grab currently selected/dealt cards
-                    Card card1 = selectedCards[0];
-                    Card card2 = selectedCards[1];
-                    Card card3 = selectedCards[2];
-                    Card card4 = selectedCards[3];
-                    // Add image of cards selected to toggle buttons
-                    toggle1.setStyle("-fx-graphic: url('" + card1.getImageUrl() + "')");
-                    toggle2.setStyle("-fx-graphic: url('" + card2.getImageUrl() + "')");
-                    toggle3.setStyle("-fx-graphic: url('" + card3.getImageUrl() + "')");
-                    toggle4.setStyle("-fx-graphic: url('" + card4.getImageUrl() + "')");
-                    // Set size of each toggle button
-                    toggle1.setMinSize(125, 150);
-                    toggle1.setMaxSize(125, 150);
-                    toggle2.setMinSize(125, 150);
-                    toggle2.setMaxSize(125, 150);
-                    toggle3.setMinSize(125, 150);
-                    toggle3.setMaxSize(125, 150);
-                    toggle4.setMinSize(125, 150);
-                    toggle4.setMaxSize(125, 150);
-
-                    // If Two Players show card selection box to buy cards
-                    if (isTwoPlayer) {
                         // Setup new window to choose cards to buy / show bought cards
                         final Stage dialog = new Stage();
                         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -538,12 +535,12 @@ public class Main extends Application {
         } else if (result.get() == buttonHard) {
             // ... user chose "Hard"
             setDifficulty(HARD);
-            // Give user option of 2 or 1 Player for Hard
+            // Give user option of One or Two Players for Hard
             alert.setTitle("Number of Players");
             alert.setHeaderText("Choose how many Players will participate");
             alert.setContentText("Choose your option: One or Two Players. Remember to press" +
                     "'Start Game' after selecting!");
-
+            // Buttons to select One or Two Players
             ButtonType buttonOnePlayer = new ButtonType("One Player");
             ButtonType buttonTwoPlayer = new ButtonType("Two Players");
 
@@ -551,10 +548,10 @@ public class Main extends Application {
             alert.getButtonTypes().removeAll(buttonEasy, buttonMedium, buttonHard);
             // Add Number of Players choice buttons
             alert.getButtonTypes().setAll(buttonOnePlayer, buttonTwoPlayer);
-
+            // Get result of button user pressed
             Optional<ButtonType> playerResult = alert.showAndWait();
             // Two Players if chosen
-            if (result.get() == buttonTwoPlayer) {
+            if (playerResult.get() == buttonTwoPlayer) {
                 setIsTwoPlayer(true);
             // One Player if chosen or box exited
             } else {
