@@ -252,58 +252,68 @@ public class Main extends Application {
                     toggle4.setMinSize(125, 150);
                     toggle4.setMaxSize(125, 150);
 
-                    // Setup new window to choose cards to buy / show bought cards
-                    final Stage dialog = new Stage();
-                    dialog.initModality(Modality.APPLICATION_MODAL);
-                    dialog.initOwner(primaryStage);
+                    // If Two Players show card selection box to buy cards
+                    if (isTwoPlayer) {
+                        // Setup new window to choose cards to buy / show bought cards
+                        final Stage dialog = new Stage();
+                        dialog.initModality(Modality.APPLICATION_MODAL);
+                        dialog.initOwner(primaryStage);
 
-                    HBox dialogHbox = new HBox(20);
-                    dialogHbox.getChildren().addAll(toggle1, toggle2, toggle3, toggle4);
+                        HBox dialogHbox = new HBox(20);
+                        dialogHbox.getChildren().addAll(toggle1, toggle2, toggle3, toggle4);
 
-                    // Confirm Buy Button
-                    Button confirmBuyBtn = new Button("Purchase Selected 'Paintings'");
-                    confirmBuyBtn.setOnAction(e2 -> {
-                        numOfCardsBought = 0;
-                        // Add text
-                        Text message = new Text("These were the cards purchased!!");
-                        message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
-                        dialogHbox.getChildren().add(message);
-                        // Place bought card images in dialogHbox
-                        if(toggle1.isSelected()) {
-                            dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
-                            numOfCardsBought++;
-                        }
-                        if(toggle2.isSelected()) {
-                            dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
-                            numOfCardsBought++;
-                        }
-                        if(toggle3.isSelected()) {
-                            dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                            numOfCardsBought++;
-                        }
-                        if(toggle4.isSelected()) {
-                            dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                            numOfCardsBought++;
-                        }
+                        // Confirm Buy Button
+                        Button confirmBuyBtn = new Button("Purchase Selected 'Paintings'");
+                        confirmBuyBtn.setOnAction(e2 -> {
+                            numOfCardsBought = 0;
+                            // Add text
+                            Text message = new Text("These were the cards purchased!!");
+                            message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
+                            dialogHbox.getChildren().add(message);
+                            // Place bought card images in dialogHbox
+                            if (toggle1.isSelected()) {
+                                dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                numOfCardsBought++;
+                            }
+                            if (toggle2.isSelected()) {
+                                dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                numOfCardsBought++;
+                            }
+                            if (toggle3.isSelected()) {
+                                dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                numOfCardsBought++;
+                            }
+                            if (toggle4.isSelected()) {
+                                dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                numOfCardsBought++;
+                            }
 
-                        // Remove toggle buttons
-                        dialogHbox.getChildren().removeAll(toggle1, toggle2, toggle3, toggle4);
-                        // Remove confirmBuyBtn
-                        dialogHbox.getChildren().remove(confirmBuyBtn);
-                        // Close stage after x amount of time
-                        PauseTransition delay = new PauseTransition(Duration.seconds(5));
-                        delay.setOnFinished( event -> dialog.close() );
-                        delay.play();
+                            // Remove toggle buttons
+                            dialogHbox.getChildren().removeAll(toggle1, toggle2, toggle3, toggle4);
+                            // Remove confirmBuyBtn
+                            dialogHbox.getChildren().remove(confirmBuyBtn);
+                            // Close stage after x amount of time
+                            PauseTransition delay = new PauseTransition(Duration.seconds(5));
+                            delay.setOnFinished(event -> dialog.close());
+                            delay.play();
+                            // Reset cards
+                            resetEvent(hbox, gridPane, randomDealBtn);
+                        });
+                        // Add confirmBuyBtn to dialogHbox
+                        dialogHbox.getChildren().add(confirmBuyBtn);
+
+                        Scene dialogScene = new Scene(dialogHbox, 800, 200);
+                        dialog.setScene(dialogScene);
+                        dialog.show();
+                    // Run computer opponent logic if One Player
+                    } else {
+                        /* * * * * * * * * * * * * * * * * * */
+                        // Code for computer logic to buy cards
+                        /* * * * * * * * * * * * * * * * * * */
+
                         // Reset cards
                         resetEvent(hbox, gridPane, randomDealBtn);
-                    });
-                    // Add confirmBuyBtn to dialogHbox
-                    dialogHbox.getChildren().add(confirmBuyBtn);
-
-                    Scene dialogScene = new Scene(dialogHbox, 800, 200);
-                    dialog.setScene(dialogScene);
-                    dialog.show();
-
+                    }
                 }
                 // Deal cancelled
                 else if(result.get() == ButtonType.CANCEL) {
