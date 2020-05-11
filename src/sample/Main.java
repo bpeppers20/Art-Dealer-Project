@@ -366,11 +366,36 @@ public class Main extends Application {
                                     }
                                 }
                             }
-                        // Multi card matching
                         } else {
-
+                            // Multi card matching
+                            switch (selectPattern) {
+                                case "Two of a Kind":
+                                    // Finds two cards with same value and different suits i.e. two of a kind/pair
+                                    // Setup in else if so only one pair is selected from the bunch
+                                    if (card1.getValue() == card2.getValue() && card1.getSuit() != card2.getSuit()) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                    } else if (card1.getValue() == card3.getValue() && card1.getSuit() != card3.getSuit()) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                    } else if (card1.getValue() == card4.getValue() && card1.getSuit() != card4.getSuit()) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    } else if (card2.getValue() == card3.getValue() && card2.getSuit() != card3.getSuit()) {
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                    } else if (card2.getValue() == card4.getValue() && card2.getSuit() != card4.getSuit()) {
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    } else if (card3.getValue() == card4.getValue() && card3.getSuit() != card4.getSuit()) {
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    }
+                                    break;
+                                case "Three of a Kind":
+                                    // code
+                            }
                         }
-
                         Scene dialogScene = new Scene(dialogHbox, 800, 200);
                         dialog.setScene(dialogScene);
                         dialog.show();
@@ -547,9 +572,14 @@ public class Main extends Application {
             upperBound = 19;
         if (difficulty == 2)
             upperBound = choices1.length;
+        // Randomly selecting pattern from choices with random index
         Random rand = new Random();
-        selectPatternIndex = rand.nextInt(upperBound);
+        // TESTING - choosing "Two of a Kind" on purpose
+        selectPatternIndex = 17;
+        //selectPatternIndex = rand.nextInt(upperBound);
         selectPattern = choices1[selectPatternIndex];
+
+
 
         System.out.println("Current Pattern: " + selectPattern);
 
