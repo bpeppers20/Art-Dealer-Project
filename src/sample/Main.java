@@ -370,30 +370,48 @@ public class Main extends Application {
                             // Multi card matching
                             switch (selectPattern) {
                                 case "Two of a Kind":
-                                    // Finds two cards with same value and different suits i.e. two of a kind/pair
+                                    // Finds two cards with same value i.e. two of a kind/pair
                                     // Setup in else if so only one pair is selected from the bunch
-                                    if (card1.getValue() == card2.getValue() && card1.getSuit() != card2.getSuit()) {
+                                    if (card1.getValue() == card2.getValue()) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
-                                    } else if (card1.getValue() == card3.getValue() && card1.getSuit() != card3.getSuit()) {
+                                    } else if (card1.getValue() == card3.getValue()) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card1.getValue() == card4.getValue() && card1.getSuit() != card4.getSuit()) {
+                                    } else if (card1.getValue() == card4.getValue()) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card2.getValue() == card3.getValue() && card2.getSuit() != card3.getSuit()) {
+                                    } else if (card2.getValue() == card3.getValue()) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card2.getValue() == card4.getValue() && card2.getSuit() != card4.getSuit()) {
+                                    } else if (card2.getValue() == card4.getValue()) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card3.getValue() == card4.getValue() && card3.getSuit() != card4.getSuit()) {
+                                    } else if (card3.getValue() == card4.getValue()) {
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
                                     }
                                     break;
                                 case "Three of a Kind":
-                                    // code
+                                    // Finds three cards with same value i.e. three of a kind
+                                    // Setup in else if so only one trio is selected from the bunch
+                                    if (card1.getValue() == card2.getValue() && card1.getValue() == card3.getValue()) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                    } else if (card1.getValue() == card2.getValue() && card1.getValue() == card4.getValue()) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    } else if (card1.getValue() == card3.getValue() && card1.getValue() == card4.getValue()) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    } else if (card2.getValue() == card3.getValue() && card2.getValue() == card4.getValue()) {
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    }
                             }
                         }
                         Scene dialogScene = new Scene(dialogHbox, 800, 200);
@@ -574,8 +592,8 @@ public class Main extends Application {
             upperBound = choices1.length;
         // Randomly selecting pattern from choices with random index
         Random rand = new Random();
-        // TESTING - choosing "Two of a Kind" on purpose
-        selectPatternIndex = 17;
+        // TESTING - choosing "Three of a Kind" on purpose
+        selectPatternIndex = 18;
         //selectPatternIndex = rand.nextInt(upperBound);
         selectPattern = choices1[selectPatternIndex];
 
