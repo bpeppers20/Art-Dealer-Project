@@ -108,7 +108,7 @@ public class Main extends Application {
         // All Guessing Options
         String [] choices1 = {"All Red", "All Black", "All Kings", "All Jacks", "All Queens", "All Aces",
                 "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks",
-                "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"}; // Will Add more after testing
+                "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind"}; // Will Add more after testing
         // < 7 = k-2; < 20 = 3-5 entire list = 6-8
 
         // Drop down menu for guesses
@@ -359,10 +359,19 @@ public class Main extends Application {
         // Stores all the possible cards that match a pattern
         // i.e. cards to buy when a specific pattern is chosen
         Map<String, PatternMatch[]> patternMatches = new HashMap<String, PatternMatch[]>();
+        Map<String, PatternMatch[][]> multiCardPatternMatches = new HashMap<String, PatternMatch[][]>();
 
         // Build Map to store cards that match each pattern
-        setupPatternMatches(patternMatches, cards, choices1);
-        System.out.println(patternMatches.get("All Red"));
+        setupPatternMatches(patternMatches, multiCardPatternMatches, cards, choices1);
+
+        // TESTING
+        PatternMatch[][] var = multiCardPatternMatches.get("Two of A Kind");
+
+        for (int i = 0; i < var.length; i++) {
+            System.out.println("PAIR " + i + ": ");
+            System.out.println(var[i][0].getValueAsString() + " of " + var[i][0].getSuitAsString());
+            System.out.println(var[i][1].getValueAsString() + " of " + var[i][1].getSuitAsString());
+        }
     }
 
     // Maps keys and images together for all 52 cards
@@ -599,24 +608,24 @@ public class Main extends Application {
 //            "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Black Same Numbers","All Red Same Numbers",
 //            "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"};
 
-    public static void setupPatternMatches(Map<String, PatternMatch[]> pmMap, Map<String, Card> cards, String[] patterns) {
+    public static void setupPatternMatches(Map<String, PatternMatch[]> pmMap, Map<String, PatternMatch[][]> multipmMap, Map<String, Card> cards, String[] patterns) {
 
         for (int i = 0; i < patterns.length; i++) {
             // Store the pattern to
             String pattern = patterns[i];
-            matchCardsToPattern(pattern, pmMap, cards);
+            matchSingleCardsToPattern(pattern, pmMap, cards);
+            matchCardsToPattern(pattern, multipmMap, cards);
         }
 
     }
 
     // Iterates through cards array to check which cards match the given pattern and store them in pmMap
-    public static void matchCardsToPattern(String pattern, Map<String, PatternMatch[]> pmMap, Map<String, Card> cards) {
+    public static void matchSingleCardsToPattern(String pattern, Map<String, PatternMatch[]> pmMap, Map<String, Card> cards) {
         PatternMatch[] colorMatches = new PatternMatch[26]; // for All Red and All Black
         PatternMatch[] valueMatches = new PatternMatch[4]; // for Same Card value cases
         PatternMatch[] colorValueMatches = new PatternMatch[2]; // for Same Card and Color cases
         PatternMatch[] faceMatches = new PatternMatch[12]; // for Jack, Queen, Kings - face card cases
         PatternMatch[] evenOddMatches = new PatternMatch[20]; // for Even or Odd cases
-
 
         int arrayCounter = 0;
 
@@ -790,12 +799,36 @@ public class Main extends Application {
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
                 break;
-            case "Two of A Kind":
-                break;
-            case "Flush":
-                break;
-
         }
+    }
+
+    public static void matchCardsToPattern(String pattern, Map<String, PatternMatch[][]> pmMap, Map<String, Card> cards) {
+        PatternMatch[][] twoOfAKindMatches = new PatternMatch[156][]; // for Two of a Kind cases
+
+        int arrayCounter = 0;
+
+        switch (pattern) {
+            case "Two of A Kind":
+
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    for (int j = 0; j < cards.size(); j++) {
+                        Card compareCard = cards.get("card" + j);
+                        // If they aren't the same card but have the same value
+                        if (i != j && curCard.getValue() == compareCard.getValue()) {
+                            PatternMatch[] pair = new PatternMatch[2];
+                            pair[0] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                            pair[1] = new PatternMatch(compareCard.getValue(), compareCard.getSuit(), compareCard.getColor());
+                            twoOfAKindMatches[arrayCounter] = pair;
+                            arrayCounter++;
+                        }
+                    }
+                }
+                System.out.println(arrayCounter);
+                pmMap.put(pattern, twoOfAKindMatches);      // Place pattern and matching array in Map object
+                break;
+        }
+
     }
 
     public static int getGuessCounter() { return guessCounter; }
