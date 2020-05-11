@@ -28,8 +28,12 @@ import jdk.nashorn.internal.runtime.arrays.ContinuousArrayData;
 
 public class Main extends Application {
     // Needed public/ global variables
-    public static String selectPattern =""; // Pattern that the cpu will select
-    public static String playerGuess =""; // Player Guess
+    public static String selectPattern = ""; // Pattern that the cpu will select
+    public static int selectPatternIndex;   // Holds index of pattern to determine single or multi card matching
+    public static PatternMatch[] currentPatternMatches; // Holds single card pattern matches
+    public static PatternMatch[][] currentMultiCardPatternMatches;  // Holds multi card pattern matches
+    public static String playerGuess = ""; // Player Guess
+
     private Stage mainStage;
     private Card[] selectedCards = new Card[4];
     private static int guessCounter;
@@ -109,7 +113,15 @@ public class Main extends Application {
         String [] choices1 = {"All Red", "All Black", "All Kings", "All Jacks", "All Queens", "All Aces",
                 "All Even", "All Odd", "All Face", "Black Kings", "Black Queens", "Black Aces", "Black Jacks",
                 "Red Kings", "Red Queens","Red Aces","Red Jacks", "Two of a Kind", "Three of a Kind"}; // Will Add more after testing
-        // < 7 = k-2; < 20 = 3-5 entire list = 6-8
+        // < 6 = k-2; < 17 = 3-5; entire list = 6-8
+
+        // Stores all the possible cards that match a pattern
+        // i.e. cards to buy when a specific pattern is chosen
+        Map<String, PatternMatch[]> patternMatches = new HashMap<String, PatternMatch[]>();
+        Map<String, PatternMatch[][]> multiCardPatternMatches = new HashMap<String, PatternMatch[][]>();
+
+        // Build Map to store cards that match each pattern
+        setupPatternMatches(patternMatches, multiCardPatternMatches, cards, choices1);
 
         // Drop down menu for guesses
         ChoiceBox guesses = new ChoiceBox();
@@ -121,7 +133,7 @@ public class Main extends Application {
       
         // Start Game button: stores randomly selected pattern for this game 
         Button startGame = new Button("Start Game");
-        startGame.setOnAction(event -> storePattern(choices1));
+        startGame.setOnAction(event -> storePattern(choices1, patternMatches, multiCardPatternMatches));
         gridPane.add(startGame, 13, 9);
         // -- Make a Guess --
         // ToDo: Need to add real action
@@ -219,14 +231,8 @@ public class Main extends Application {
                     // OK button is pressed
                     System.out.println("Confirmed!!!");
 
-                    Card boughtCards[] = new Card[4];
-
-                    // If Two Players setup and show card selection box to buy cards
+                    // If Two Players, setup and show card selection box to buy cards
                     if (getIsTwoPlayer()) {
-                        Alert selectCards = new Alert(AlertType.CONFIRMATION);
-                        selectCards.setTitle("Cards that are Dealt");
-                        selectCards.setHeaderText("Choose the 'paintings' to buy.");
-                        selectCards.setContentText("Choose your 'paintings'.");
                         // Toggle buttons to choose which cards to buy
                         ToggleButton toggle1 = new ToggleButton();
                         ToggleButton toggle2 = new ToggleButton();
@@ -303,11 +309,76 @@ public class Main extends Application {
                         Scene dialogScene = new Scene(dialogHbox, 800, 200);
                         dialog.setScene(dialogScene);
                         dialog.show();
-                    // Run computer opponent logic if One Player
+                    // If One Player, run computer logic
                     } else {
                         /* * * * * * * * * * * * * * * * * * */
                         // Code for computer logic to buy cards
                         /* * * * * * * * * * * * * * * * * * */
+
+                        // Setup new window to show bought cards by computer
+                        final Stage dialog = new Stage();
+                        dialog.initModality(Modality.APPLICATION_MODAL);
+                        dialog.initOwner(primaryStage);
+
+                        HBox dialogHbox = new HBox(20);
+
+                        // Add text
+                        Text message = new Text("These were the cards purchased!!");
+                        message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
+                        dialogHbox.getChildren().add(message);
+
+                        /* Logic to choose cards and place them in the dialogHbox */
+                        // Grab currently selected/dealt cards
+                        Card card1 = selectedCards[0];
+                        Card card2 = selectedCards[1];
+                        Card card3 = selectedCards[2];
+                        Card card4 = selectedCards[3];
+
+                        // Single card matching
+                        if (selectPatternIndex < 17) {
+                            // Loops through all possible pattern matches and if any of the
+                            // four selected cards match it will be added to the dialogHbox
+                            for (int i = 0; i < currentPatternMatches.length; i++) {
+                                if(currentPatternMatches[i] != null) {
+                                    if (currentPatternMatches[i].getValue() == card1.getValue()) {
+                                        if (currentPatternMatches[i].getSuit() == card1.getSuit()) {
+                                            if (currentPatternMatches[i].getColor() == card1.getColor())
+                                                dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        }
+                                    }
+                                    if (currentPatternMatches[i].getValue() == card2.getValue()) {
+                                        if (currentPatternMatches[i].getSuit() == card2.getSuit()) {
+                                            if (currentPatternMatches[i].getColor() == card2.getColor())
+                                                dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                        }
+                                    }
+                                    if (currentPatternMatches[i].getValue() == card3.getValue()) {
+                                        if (currentPatternMatches[i].getSuit() == card3.getSuit()) {
+                                            if (currentPatternMatches[i].getColor() == card3.getColor())
+                                                dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                        }
+                                    }
+                                    if (currentPatternMatches[i].getValue() == card4.getValue()) {
+                                        if (currentPatternMatches[i].getSuit() == card4.getSuit()) {
+                                            if (currentPatternMatches[i].getColor() == card4.getColor())
+                                                dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                        }
+                                    }
+                                }
+                            }
+                        // Multi card matching
+                        } else {
+
+                        }
+
+                        Scene dialogScene = new Scene(dialogHbox, 800, 200);
+                        dialog.setScene(dialogScene);
+                        dialog.show();
+
+                        // Close stage after x amount of time
+                        PauseTransition delay = new PauseTransition(Duration.seconds(5));
+                        delay.setOnFinished(event -> dialog.close());
+                        delay.play();
 
                         // Reset cards
                         resetEvent(hbox, gridPane, randomDealBtn);
@@ -355,14 +426,6 @@ public class Main extends Application {
         // Set guesses remaining text and add to ui
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
         guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
-
-        // Stores all the possible cards that match a pattern
-        // i.e. cards to buy when a specific pattern is chosen
-        Map<String, PatternMatch[]> patternMatches = new HashMap<String, PatternMatch[]>();
-        Map<String, PatternMatch[][]> multiCardPatternMatches = new HashMap<String, PatternMatch[][]>();
-
-        // Build Map to store cards that match each pattern
-        setupPatternMatches(patternMatches, multiCardPatternMatches, cards, choices1);
 
         // TESTING
         PatternMatch[][] var = multiCardPatternMatches.get("Three of a Kind");
@@ -475,7 +538,7 @@ public class Main extends Application {
 
 
     // Was sending in global variables, just need to access them no need to use as arguments
-    private void storePattern(String[] choices1) // Cpu selects pattern at random
+    private void storePattern(String[] choices1, Map<String, PatternMatch[]> patternMatches, Map<String, PatternMatch[][]> multiCardPatternMatches) // Cpu selects pattern at random
     {
         int upperBound = -1; // Limit Question based on difficulty
         if (difficulty == 0)
@@ -485,9 +548,20 @@ public class Main extends Application {
         if (difficulty == 2)
             upperBound = choices1.length;
         Random rand = new Random();
-        int index = rand.nextInt(upperBound);
-        selectPattern = choices1[index];
-        System.out.println(selectPattern);
+        selectPatternIndex = rand.nextInt(upperBound);
+        selectPattern = choices1[selectPatternIndex];
+
+        System.out.println("Current Pattern: " + selectPattern);
+
+        // 17 is last index of EASY and MEDIUM, all of which only match single cards
+        if (selectPatternIndex < 17) {
+            currentPatternMatches = new PatternMatch[patternMatches.get(selectPattern).length];
+            currentPatternMatches = patternMatches.get(selectPattern).clone();
+            // If above 17 it's a multi card matching pattern
+        } else {
+            currentMultiCardPatternMatches = new PatternMatch[multiCardPatternMatches.get(selectPattern).length][];
+            currentMultiCardPatternMatches = multiCardPatternMatches.get(selectPattern).clone();
+        }
     }
 
     public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses, VBox guessVbox, Button guessBtn)
@@ -496,7 +570,7 @@ public class Main extends Application {
         playerGuess = guesses.getValue();
         System.out.println("Guess was clicked!");
       
-        // Alert if the player has used all guesses
+        // Alert if the player has used all guesses, only shows when 0 guesses
         Alert a = new Alert(AlertType.WARNING);
         a.setContentText("0 Guesses remaining! Game Lost!");
       
@@ -605,17 +679,13 @@ public class Main extends Application {
         return diffDisplay;
     }
 
-//    String [] choices1 = {"All Red", "All Black", "All Same Numbers", "All Kings", "All Jacks", "All Queens", "All Aces",
-//            "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Black Same Numbers","All Red Same Numbers",
-//            "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"};
-
     public static void setupPatternMatches(Map<String, PatternMatch[]> pmMap, Map<String, PatternMatch[][]> multipmMap, Map<String, Card> cards, String[] patterns) {
-
+        // Loops through all patterns and sets the matching patterns in appropriate Map structure
         for (int i = 0; i < patterns.length; i++) {
             // Store the pattern to
             String pattern = patterns[i];
             matchSingleCardsToPattern(pattern, pmMap, cards);
-            matchCardsToPattern(pattern, multipmMap, cards);
+            matchMultipleCardsToPattern(pattern, multipmMap, cards);
         }
 
     }
@@ -803,7 +873,7 @@ public class Main extends Application {
         }
     }
 
-    public static void matchCardsToPattern(String pattern, Map<String, PatternMatch[][]> pmMap, Map<String, Card> cards) {
+    public static void matchMultipleCardsToPattern(String pattern, Map<String, PatternMatch[][]> pmMap, Map<String, Card> cards) {
         PatternMatch[][] twoOfAKindMatches = new PatternMatch[156][]; // for Two of a Kind cases
         PatternMatch[][] threeOfAKindMatches = new PatternMatch[312][]; // for Three of a Kind cases
 
@@ -825,13 +895,12 @@ public class Main extends Application {
                         }
                     }
                 }
-                System.out.println("pair arr counter: " + arrayCounter);
                 pmMap.put(pattern, twoOfAKindMatches);      // Place pattern and matching array in Map object
                 break;
             case "Three of a Kind":
-                System.out.println("three begin arr counter: " + arrayCounter);
                 for (int i = 0; i < cards.size(); i++) {
                     Card curCard = cards.get("card" + i);
+                    // Loop to find a matching card
                     for (int j = 0; j < cards.size(); j++) {
                         Card compareCard1 = cards.get("card" + j);
                         // If they aren't the same card but have the same value
@@ -851,7 +920,6 @@ public class Main extends Application {
                         }
                     }
                 }
-                System.out.println("arr counter: " + arrayCounter);
                 pmMap.put(pattern, threeOfAKindMatches);      // Place pattern and matching array in Map object
                 break;
         }
