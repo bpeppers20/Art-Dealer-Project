@@ -630,8 +630,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorMatches);       // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(colorMatches, null);    // Reset array
                 break;
             case "All Black":
                 for (int i = 0; i < cards.size(); i++) {
@@ -642,8 +640,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorMatches);       // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(colorMatches, null);    // Reset array
                 break;
             case "All Kings":
                 for (int i = 0; i < cards.size(); i++) {
@@ -654,8 +650,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(valueMatches, null);    // Reset array
                 break;
             case "All Jacks":
                 for (int i = 0; i < cards.size(); i++) {
@@ -666,8 +660,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(valueMatches, null);    // Reset array
                 break;
             case "All Queens":
                 for (int i = 0; i < cards.size(); i++) {
@@ -678,8 +670,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(valueMatches, null);    // Reset array
                 break;
             case "All Aces":
                 for (int i = 0; i < cards.size(); i++) {
@@ -690,8 +680,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(valueMatches, null);    // Reset array
                 break;
             case "All Even":
                 for (int i = 0; i < cards.size(); i++) {
@@ -702,8 +690,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, evenOddMatches);     // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(evenOddMatches, null);  // Reset array
                 break;
             case "All Odd":
                 for (int i = 0; i < cards.size(); i++) {
@@ -714,8 +700,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, evenOddMatches);     // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(evenOddMatches, null);  // Reset array
                 break;
             case "All Face":
                 for (int i = 0; i < cards.size(); i++) {
@@ -726,8 +710,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, faceMatches);     // Place pattern and matching array in Map object
-                arrayCounter = 0;                       // Reset counter
-                Arrays.fill(faceMatches, null);  // Reset array
                 break;
             case "Black Kings":
                 for (int i = 0; i < cards.size(); i++) {
@@ -738,8 +720,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Black Queens":
                 for (int i = 0; i < cards.size(); i++) {
@@ -750,8 +730,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Black Aces":
                 for (int i = 0; i < cards.size(); i++) {
@@ -762,8 +740,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Black Jacks":
                 for (int i = 0; i < cards.size(); i++) {
@@ -774,8 +750,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Red Kings":for (int i = 0; i < cards.size(); i++) {
                 Card curCard = cards.get("card" + i);
@@ -785,8 +759,6 @@ public class Main extends Application {
                 }
             }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Red Queens":
                 for (int i = 0; i < cards.size(); i++) {
@@ -797,8 +769,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Red Aces":
                 for (int i = 0; i < cards.size(); i++) {
@@ -809,8 +779,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Red Jacks":
                 for (int i = 0; i < cards.size(); i++) {
@@ -821,8 +789,6 @@ public class Main extends Application {
                     }
                 }
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
-                arrayCounter = 0;                           // Reset counter
-                Arrays.fill(colorValueMatches, null);   // Reset array
                 break;
             case "Two of A Kind":
                 break;
