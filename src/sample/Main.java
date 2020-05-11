@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.control.Alert.AlertType;
 import javafx.util.Duration;
+import jdk.nashorn.internal.runtime.arrays.ContinuousArrayData;
 
 public class Main extends Application {
     // Needed public/ global variables
@@ -105,8 +106,8 @@ public class Main extends Application {
 
         // Variables for Choices
         // All Guessing Options
-        String [] choices1 = {"All Red", "All Black", "All Same Numbers", "All Kings", "All Jacks", "All Queens", "All Aces",
-                "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Back Same Numbers","All Red Same Numbers",
+        String [] choices1 = {"All Red", "All Black", "All Kings", "All Jacks", "All Queens", "All Aces",
+                "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks",
                 "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"}; // Will Add more after testing
         // < 7 = k-2; < 20 = 3-5 entire list = 6-8
 
@@ -355,7 +356,13 @@ public class Main extends Application {
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
         guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
 
-//        game(primaryStage);
+        // Stores all the possible cards that match a pattern
+        // i.e. cards to buy when a specific pattern is chosen
+        Map<String, PatternMatch[]> patternMatches = new HashMap<String, PatternMatch[]>();
+
+        // Build Map to store cards that match each pattern
+        setupPatternMatches(patternMatches, cards, choices1);
+        System.out.println(patternMatches.get("All Red"));
     }
 
     // Maps keys and images together for all 52 cards
@@ -365,10 +372,20 @@ public class Main extends Application {
         int j = 0;  // Row counter and suit
         // Creating Map of Card Objects
         for (int k = 0; k < 52; k++) {
-            cards.put("card" + k, new Card(i + 1, j, i, j, new ImageView( new Image("https://liveexample.pearsoncmg.com/book/image/card/"
-                    + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
-                    + (k + 1) + ".png"));
-            //
+            /*  If/else constructs Card objects Black or Red relative to the order the images are stored
+                Black Cards are 0-12 & 39-51  ---- Red Cards are 13-38 */
+            // Black Cards
+            if (k < 13 || k > 38 ) {
+                cards.put("card" + k, new Card(i + 1, j, Card.BLACK, i, j, new ImageView(new Image("https://liveexample.pearsoncmg.com/book/image/card/"
+                        + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
+                        + (k + 1) + ".png"));
+            // Red Cards
+            } else {
+                cards.put("card" + k, new Card(i + 1, j, Card.RED, i, j, new ImageView(new Image("https://liveexample.pearsoncmg.com/book/image/card/"
+                        + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
+                        + (k + 1) + ".png"));
+            }
+
             if((i % 12) == 0 && i != 0) {
                 j++;
                 i = 0;
@@ -576,6 +593,243 @@ public class Main extends Application {
         }
 
         return diffDisplay;
+    }
+
+//    String [] choices1 = {"All Red", "All Black", "All Same Numbers", "All Kings", "All Jacks", "All Queens", "All Aces",
+//            "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks","All Black Same Numbers","All Red Same Numbers",
+//            "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind","Flush"};
+
+    public static void setupPatternMatches(Map<String, PatternMatch[]> pmMap, Map<String, Card> cards, String[] patterns) {
+
+        for (int i = 0; i < patterns.length; i++) {
+            // Store the pattern to
+            String pattern = patterns[i];
+            matchCardsToPattern(pattern, pmMap, cards);
+        }
+
+    }
+
+    // Iterates through cards array to check which cards match the given pattern and store them in pmMap
+    public static void matchCardsToPattern(String pattern, Map<String, PatternMatch[]> pmMap, Map<String, Card> cards) {
+        PatternMatch[] colorMatches = new PatternMatch[26]; // for All Red and All Black
+        PatternMatch[] valueMatches = new PatternMatch[4]; // for Same Card value cases
+        PatternMatch[] colorValueMatches = new PatternMatch[2]; // for Same Card and Color cases
+        PatternMatch[] faceMatches = new PatternMatch[12]; // for Jack, Queen, Kings - face card cases
+        PatternMatch[] evenOddMatches = new PatternMatch[20]; // for Even or Odd cases
+
+
+        int arrayCounter = 0;
+
+        switch(pattern) {
+            case "All Red":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getSuit() == Card.RED) {
+                        colorMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorMatches);       // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(colorMatches, null);    // Reset array
+                break;
+            case "All Black":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getSuit() == Card.BLACK) {
+                        colorMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorMatches);       // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(colorMatches, null);    // Reset array
+                break;
+            case "All Kings":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.KING) {
+                        valueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(valueMatches, null);    // Reset array
+                break;
+            case "All Jacks":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.JACK) {
+                        valueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(valueMatches, null);    // Reset array
+                break;
+            case "All Queens":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.QUEEN) {
+                        valueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(valueMatches, null);    // Reset array
+                break;
+            case "All Aces":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.ACE) {
+                        valueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, valueMatches);       // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(valueMatches, null);    // Reset array
+                break;
+            case "All Even":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() >= 2 && curCard.getValue() <= 10 && curCard.getValue() % 2 == 0) {
+                        evenOddMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, evenOddMatches);     // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(evenOddMatches, null);  // Reset array
+                break;
+            case "All Odd":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() > 2 && curCard.getValue() < 10 && curCard.getValue() % 2 != 0) {
+                        evenOddMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, evenOddMatches);     // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(evenOddMatches, null);  // Reset array
+                break;
+            case "All Face":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() >= 11) {
+                        faceMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, faceMatches);     // Place pattern and matching array in Map object
+                arrayCounter = 0;                       // Reset counter
+                Arrays.fill(faceMatches, null);  // Reset array
+                break;
+            case "Black Kings":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.KING && curCard.getColor() == Card.BLACK) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Black Queens":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.QUEEN && curCard.getColor() == Card.BLACK) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Black Aces":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.ACE && curCard.getColor() == Card.BLACK) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Black Jacks":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.JACK && curCard.getColor() == Card.BLACK) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Red Kings":for (int i = 0; i < cards.size(); i++) {
+                Card curCard = cards.get("card" + i);
+                if (curCard.getValue() == Card.KING && curCard.getColor() == Card.RED) {
+                    colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                    arrayCounter++;
+                }
+            }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Red Queens":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.QUEEN && curCard.getColor() == Card.RED) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Red Aces":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.ACE && curCard.getColor() == Card.RED) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Red Jacks":
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    if (curCard.getValue() == Card.JACK && curCard.getColor() == Card.RED) {
+                        colorValueMatches[arrayCounter] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                        arrayCounter++;
+                    }
+                }
+                pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
+                arrayCounter = 0;                           // Reset counter
+                Arrays.fill(colorValueMatches, null);   // Reset array
+                break;
+            case "Two of A Kind":
+                break;
+            case "Flush":
+                break;
+
+        }
     }
 
     public static int getGuessCounter() { return guessCounter; }

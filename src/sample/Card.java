@@ -20,8 +20,12 @@ public class Card extends Node {
             QUEEN = 12,       //   numerical values for their codes.
             KING = 13;
 
+    public final static int BLACK = 0, RED = 1;
+
     private final int suit;   // The suit of this card, one of the constants
     //    SPADES, HEARTS, DIAMONDS, CLUBS.
+
+    private final int color;  // The color of this card, RED or BLACK
 
     private final int value;  // The value of this card, from 1 to 13.
 
@@ -33,13 +37,14 @@ public class Card extends Node {
 
     private final String imageUrl;
 
-    public Card(int theValue, int theSuit, int x, int y, ImageView image, String imageUrl) {
+    public Card(int theValue, int theSuit, int theColor, int x, int y, ImageView image, String imageUrl) {
         // Construct a card with the specified value and suit.
         // Value must be between 1 and 13.  Suit must be between
         // 0 and 3.  If the parameters are outside these ranges,
         // the constructed card object will be invalid.
         this.value = theValue;
         this.suit = theSuit;
+        this.color = theColor;
         this.xPos = x;
         this.yPos = y;
         this.image = image;
@@ -50,6 +55,8 @@ public class Card extends Node {
     public int getSuit() { return suit; }
     // Return the int that codes for this card's value.
     public int getValue() { return value; }
+    // Return the int that codes for this card's color.
+    public int getColor() { return color; }
     // Return x coordinate in GridPane
     public int getXPos() { return this.xPos; }
     // Return y coordinate in GridPane
@@ -67,6 +74,14 @@ public class Card extends Node {
             case DIAMONDS: return "Diamonds";
             case CLUBS:    return "Clubs";
             default:       return "??";
+        }
+    }
+
+    public String getColorAsString() {
+        switch (color) {
+            case BLACK: return "Black";
+            case RED:   return "Red";
+            default:    return "??";
         }
     }
 
