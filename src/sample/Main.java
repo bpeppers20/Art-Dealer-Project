@@ -34,6 +34,7 @@ public class Main extends Application {
     private static int guessCounter;
     private static int difficulty;
     private int numOfCardsBought = 0;
+    public static int isCorrect = 0;
 
     // Difficulty level codes
     public final static int EASY = 0, MEDIUM = 1, HARD = 2;
@@ -460,7 +461,6 @@ public class Main extends Application {
         selectPattern = s1;
         playerGuess = guesses.getValue();
         System.out.println("Guess was clicked!");
-      
         // Alert if the player has used all guesses
         Alert a = new Alert(AlertType.WARNING);
         a.setContentText("0 Guesses remaining! Game Lost!");
@@ -468,9 +468,11 @@ public class Main extends Application {
         if (playerGuess.equals(selectPattern))
         {
             System.out.println("Your Guess was Correct!");
+            isCorrect = 1;
         }
         else{
             System.out.println("Your Guess was Wrong! Try Again!");
+            isCorrect = 2;
           
             if (guessCounter > 0) {
                 // Decrement global guess counter
@@ -487,6 +489,20 @@ public class Main extends Application {
                 a.show();
                 guessBtn.setDisable(true);
             }
+        }
+        // Visual aid for correct or wrong guess
+        Alert b = new Alert(AlertType.NONE); // Create new Alert for guesses
+        if (isCorrect == 1)
+        {
+            b.setAlertType(AlertType.INFORMATION);
+            b.setContentText("Congratulations! Your Guess Was Correct");
+            b.show();
+        }
+        else
+        {
+            b.setAlertType(AlertType.INFORMATION);
+            b.setContentText("Your Guess was Wrong! Try Again!");
+            b.show();
         }
         //System.out.println(playerGuess);
         //System.out.println("pattern = " + selectPattern);
