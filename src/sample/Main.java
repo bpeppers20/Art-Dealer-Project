@@ -107,8 +107,8 @@ public class Main extends Application {
         // Variables for Choices
         // All Guessing Options
         String [] choices1 = {"All Red", "All Black", "All Kings", "All Jacks", "All Queens", "All Aces",
-                "All Even", "All Odd", "All Face", "Black Kings","Black Queens","Black Aces","Black Jacks",
-                "Red Kings","Red Queens","Red Aces","Red Jacks","Two of A Kind"}; // Will Add more after testing
+                "All Even", "All Odd", "All Face", "Black Kings", "Black Queens", "Black Aces", "Black Jacks",
+                "Red Kings", "Red Queens","Red Aces","Red Jacks", "Two of a Kind", "Three of a Kind"}; // Will Add more after testing
         // < 7 = k-2; < 20 = 3-5 entire list = 6-8
 
         // Drop down menu for guesses
@@ -365,12 +365,13 @@ public class Main extends Application {
         setupPatternMatches(patternMatches, multiCardPatternMatches, cards, choices1);
 
         // TESTING
-        PatternMatch[][] var = multiCardPatternMatches.get("Two of A Kind");
+        PatternMatch[][] var = multiCardPatternMatches.get("Three of a Kind");
 
         for (int i = 0; i < var.length; i++) {
-            System.out.println("PAIR " + i + ": ");
+            System.out.println("TRIO " + i + ": ");
             System.out.println(var[i][0].getValueAsString() + " of " + var[i][0].getSuitAsString());
             System.out.println(var[i][1].getValueAsString() + " of " + var[i][1].getSuitAsString());
+            System.out.println(var[i][2].getValueAsString() + " of " + var[i][2].getSuitAsString());
         }
     }
 
@@ -804,12 +805,12 @@ public class Main extends Application {
 
     public static void matchCardsToPattern(String pattern, Map<String, PatternMatch[][]> pmMap, Map<String, Card> cards) {
         PatternMatch[][] twoOfAKindMatches = new PatternMatch[156][]; // for Two of a Kind cases
+        PatternMatch[][] threeOfAKindMatches = new PatternMatch[312][]; // for Three of a Kind cases
 
         int arrayCounter = 0;
 
         switch (pattern) {
-            case "Two of A Kind":
-
+            case "Two of a Kind":
                 for (int i = 0; i < cards.size(); i++) {
                     Card curCard = cards.get("card" + i);
                     for (int j = 0; j < cards.size(); j++) {
@@ -824,8 +825,34 @@ public class Main extends Application {
                         }
                     }
                 }
-                System.out.println(arrayCounter);
+                System.out.println("pair arr counter: " + arrayCounter);
                 pmMap.put(pattern, twoOfAKindMatches);      // Place pattern and matching array in Map object
+                break;
+            case "Three of a Kind":
+                System.out.println("three begin arr counter: " + arrayCounter);
+                for (int i = 0; i < cards.size(); i++) {
+                    Card curCard = cards.get("card" + i);
+                    for (int j = 0; j < cards.size(); j++) {
+                        Card compareCard1 = cards.get("card" + j);
+                        // If they aren't the same card but have the same value
+                        if (i != j && curCard.getValue() == compareCard1.getValue()) {
+                            // Now loop once more to find third matching card
+                            for (int k = 0; k < cards.size(); k++) {
+                                Card compareCard2 = cards.get("card" + k);
+                                if ( i != k && j != k && compareCard1.getValue() == compareCard2.getValue()) {
+                                    PatternMatch[] trio = new PatternMatch[3];
+                                    trio[0] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
+                                    trio[1] = new PatternMatch(compareCard1.getValue(), compareCard1.getSuit(), compareCard1.getColor());
+                                    trio[2] = new PatternMatch(compareCard2.getValue(), compareCard2.getSuit(), compareCard2.getColor());
+                                    threeOfAKindMatches[arrayCounter] = trio;
+                                    arrayCounter++;
+                                }
+                            }
+                        }
+                    }
+                }
+                System.out.println("arr counter: " + arrayCounter);
+                pmMap.put(pattern, threeOfAKindMatches);      // Place pattern and matching array in Map object
                 break;
         }
 
