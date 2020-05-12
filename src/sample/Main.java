@@ -132,6 +132,9 @@ public class Main extends Application {
         }
         gridPane.add(guesses, 13, 6);
 
+        Text guessChoiceLabel = new Text("Choose guess above");
+        gridPane.add(guessChoiceLabel, 13, 7);
+
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
         randomDealBtn.setOnAction(e -> {
