@@ -469,16 +469,6 @@ public class Main extends Application {
         // Set guesses remaining text and add to ui
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
         guessVbox.getChildren().addAll(guessLabel, guessesRemainingLabel);
-
-        // TESTING
-        PatternMatch[][] var = multiCardPatternMatches.get("Three of a Kind");
-
-        for (int i = 0; i < var.length; i++) {
-            System.out.println("TRIO " + i + ": ");
-            System.out.println(var[i][0].getValueAsString() + " of " + var[i][0].getSuitAsString());
-            System.out.println(var[i][1].getValueAsString() + " of " + var[i][1].getSuitAsString());
-            System.out.println(var[i][2].getValueAsString() + " of " + var[i][2].getSuitAsString());
-        }
     }
 
     // Maps keys and images together for all 52 cards
