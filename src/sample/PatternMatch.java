@@ -1,15 +1,10 @@
 package sample;
 
-import com.sun.javafx.geom.BaseBounds;
-import com.sun.javafx.geom.transform.BaseTransform;
-import com.sun.javafx.jmx.MXNodeAlgorithm;
-import com.sun.javafx.jmx.MXNodeAlgorithmContext;
-import com.sun.javafx.sg.prism.NGNode;
-import javafx.scene.Node;
-import javafx.scene.image.ImageView;
-
-public class Card extends Node {
-
+/*
+    Uses the same basic structure of Card just to store the
+    value and suit of cards that will match a pattern
+ */
+public class PatternMatch {
     public final static int SPADES = 0,       // Codes for the 4 suits.
             HEARTS = 1,
             DIAMONDS = 2,
@@ -25,30 +20,14 @@ public class Card extends Node {
     private final int suit;   // The suit of this card, one of the constants
     //    SPADES, HEARTS, DIAMONDS, CLUBS.
 
-    private final int color;  // The color of this card, RED or BLACK
-
     private final int value;  // The value of this card, from 1 to 13.
 
-    private final int xPos;   // Hold x coordinate in GridPane
+    private final int color;
 
-    private final int yPos;   // Hold y coordinate in GridPane
-
-    private final ImageView image;
-
-    private final String imageUrl;
-
-    public Card(int theValue, int theSuit, int theColor, int x, int y, ImageView image, String imageUrl) {
-        // Construct a card with the specified value and suit.
-        // Value must be between 1 and 13.  Suit must be between
-        // 0 and 3.  If the parameters are outside these ranges,
-        // the constructed card object will be invalid.
+    public PatternMatch(int theValue, int theSuit, int theColor) {
         this.value = theValue;
         this.suit = theSuit;
         this.color = theColor;
-        this.xPos = x;
-        this.yPos = y;
-        this.image = image;
-        this.imageUrl = imageUrl;
     }
 
     // Return the int that codes for this card's suit.
@@ -57,13 +36,6 @@ public class Card extends Node {
     public int getValue() { return value; }
     // Return the int that codes for this card's color.
     public int getColor() { return color; }
-    // Return x coordinate in GridPane
-    public int getXPos() { return this.xPos; }
-    // Return y coordinate in GridPane
-    public int getYPos() { return this.yPos; }
-    // Return associated image for card
-    public ImageView getImage() { return this.image; }
-    public String getImageUrl() { return this.imageUrl; }
 
     public String getSuitAsString() {
         // Return a String representing the card's suit.
@@ -105,29 +77,4 @@ public class Card extends Node {
             default:  return "??";
         }
     }
-
-    @Override
-    protected NGNode impl_createPeer() {
-        return null;
-    }
-    @Override
-    public BaseBounds impl_computeGeomBounds(BaseBounds bounds, BaseTransform tx) {
-        return null;
-    }
-    @Override
-    protected boolean impl_computeContains(double localX, double localY) {
-        return false;
-    }
-    @Override
-    public Object impl_processMXNode(MXNodeAlgorithm alg, MXNodeAlgorithmContext ctx) {
-        return null;
-    }
-
-    public String toString() {
-        // Return a String representation of this card, such as
-        // "10 of Hearts" or "Queen of Spades".
-        return getValueAsString() + " of " + getSuitAsString();
-    }
-
-
 }
