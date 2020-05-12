@@ -27,29 +27,25 @@ import javafx.util.Duration;
 import jdk.nashorn.internal.runtime.arrays.ContinuousArrayData;
 
 public class Main extends Application {
-    // Needed public/ global variables
-    public static String selectPattern = ""; // Pattern that the cpu will select
-    public static int selectPatternIndex;   // Holds index of pattern to determine single or multi card matching
-    public static PatternMatch[] currentPatternMatches; // Holds single card pattern matches
-    public static PatternMatch[][] currentMultiCardPatternMatches;  // Holds multi card pattern matches
-    public static String playerGuess = ""; // Player Guess
+    public static String selectPattern = "";                // Pattern that the cpu will select
+    public static int selectPatternIndex;                   // Holds pattern index to determine single or multi card matching
+    public static PatternMatch[] currentPatternMatches;     // Holds single card pattern matches
+    public static String playerGuess = "";                  // Player Guess
+    public final static int EASY = 0, MEDIUM = 1, HARD = 2; // Difficulty level codes
 
     private Stage mainStage;
-    private Card[] selectedCards = new Card[4];
-    private static int guessCounter;
-    private static int difficulty;
-    private int numOfCardsBought = 0;
-    private static boolean isTwoPlayer = false;
+    private Card[] selectedCards = new Card[4]; // Holds cards selected/dealt
+    private static int guessCounter;            // Holds guesses left to use by player
+    private static int difficulty;              // Holds difficulty level for game
+    private int numOfCardsBought = 0;           // Holds number of cards bought, used to enable guessBtn
+    private static boolean isTwoPlayer = false; // Holds if the game is played by one or two players
 
-    // Difficulty level codes
-    public final static int EASY = 0, MEDIUM = 1, HARD = 2;
+
 
     public void start(Stage primaryStage) throws Exception{
         this.mainStage = primaryStage;
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-        //Parent rootP = FXMLLoader.load(getClass().getResource("sample.fxml"))
 
-        /* * * GRID PANE SETUP * * */
         //Creating a Grid Pane
         GridPane gridPane = new GridPane();
 
@@ -68,8 +64,8 @@ public class Main extends Application {
 
         // GridPane styling
         gridPane.setStyle("-fx-background-color: GREEN; -fx-font-family: 'Cambria Math';");
-        /* * * * * * * * * * * * * */
 
+        // String that displays the difficulty chosen
         String difficultyDisplay = "";
 
         // Current Card section
@@ -81,14 +77,13 @@ public class Main extends Application {
         // Add hbox to gridPane at the bottom
         gridPane.add(hbox, 0, 7, 8,2);
 
-        // Guess Counter box
+        // Guess Counter box - added to display after difficulty chosen
         VBox guessVbox = new VBox();
         Text guessLabel = new Text("Guesses Remaining:");
         guessVbox.setStyle("-fx-font-size: 125%; -fx-alignment: center; -fx-border-color: black; -fx-border-width: 2px;" +
                 "-fx-border-radius: 95%;");
-        // We add vbox and the number of guesses remaining after difficulty chosen
 
-        // Add guessHbox to gridPane
+        // Add guessVbox to gridPane
         gridPane.add(guessVbox, 9,7,2,1);
 
         // Data structure to hold images of all cards
@@ -99,7 +94,6 @@ public class Main extends Application {
         // Add cards to GridPane
         addCards(gridPane, cards);
 
-
         /* * * * Buttons * * * */
 
         // -- Close Application --
@@ -108,32 +102,28 @@ public class Main extends Application {
                 primaryStage.fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST))
         );
 
-        // Variables for Choices
-        // All Guessing Options
+        // All Guessing Options : < 6 = k-2; < 17 = 3-5; entire list = 6-8
         String [] choices1 = {"All Red", "All Black", "All Kings", "All Jacks", "All Queens", "All Aces",
                 "All Even", "All Odd", "All Face", "Black Kings", "Black Queens", "Black Aces", "Black Jacks",
-                "Red Kings", "Red Queens","Red Aces","Red Jacks", "Two of a Kind", "Three of a Kind"}; // Will Add more after testing
-        // < 6 = k-2; < 17 = 3-5; entire list = 6-8
+                "Red Kings", "Red Queens","Red Aces","Red Jacks", "Two of a Kind", "Three of a Kind", "Four of a Kind", "Two Pair"};
 
         // Stores all the possible cards that match a pattern
         // i.e. cards to buy when a specific pattern is chosen
         Map<String, PatternMatch[]> patternMatches = new HashMap<String, PatternMatch[]>();
-        Map<String, PatternMatch[][]> multiCardPatternMatches = new HashMap<String, PatternMatch[][]>();
 
-        // Build Map to store cards that match each pattern
-        setupPatternMatches(patternMatches, multiCardPatternMatches, cards, choices1);
+        // Build Map to store cards that match each single card pattern
+        setupPatternMatches(patternMatches, cards, choices1);
 
         // Drop down menu for guesses
         ChoiceBox guesses = new ChoiceBox();
-        for (int i= 0; i < choices1.length; i++)
-        {
+        for (int i= 0; i < choices1.length; i++) {
             guesses.getItems().add(choices1[i]);
         }
         gridPane.add(guesses, 12, 6);
       
         // Start Game button: stores randomly selected pattern for this game 
         Button startGame = new Button("Start Game");
-        startGame.setOnAction(event -> storePattern(choices1, patternMatches, multiCardPatternMatches));
+        startGame.setOnAction(event -> storePattern(choices1, patternMatches));
         gridPane.add(startGame, 13, 9);
         // -- Make a Guess --
         // ToDo: Need to add real action
@@ -149,8 +139,6 @@ public class Main extends Application {
 
         // Make Answer to be guessed
 
-        // Test output
-        System.out.println(playerGuess);
         Button guessBtn = new Button("Make a Guess");
 
         guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses, guessVbox, guessBtn));
@@ -162,13 +150,12 @@ public class Main extends Application {
             int numSelected = hbox.getChildren().size();
 
             // ArrayList holding 0-51 to access imageViews indices
-            // Using list to ensure that each number selected is
-            // unique when being chosen
+            // * Using list to ensure that each number selected is unique when being chosen
             ArrayList<Integer> list = new ArrayList<Integer>();
             for (int k = 0; k < 52; k++) {
                 list.add(new Integer(k));
             }
-             Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
+            Collections.shuffle(list);  // Shuffle list of 0-51 to 'randomize' it
 
             // Switch cascades to add the appropriate number of
             // randomly selected cards depending on how many are
@@ -191,15 +178,9 @@ public class Main extends Application {
                     ImageView cardImage4 = selectedCards[3].getImage();
                     hbox.getChildren().add(cardImage4);
                     break;
-                default:
-                    System.out.println("Already 4 Cards selected");
             }
-
             // Disable Random Deal button
             randomDealBtn.setDisable(true);
-
-            // ToDo: Still need to re-enable the button once the next turn starts
-
         });
 
         // -- Reset Deal --
@@ -224,25 +205,28 @@ public class Main extends Application {
 
                 if(!result.isPresent()) {
                     // Alert is exited, no button has been pressed.
-                    System.out.println("Confirm exited");
                 }
                 // Deal Confirmed
                 else if(result.get() == ButtonType.OK) {
                     // OK button is pressed
-                    System.out.println("Confirmed!!!");
+                    // Grab currently selected/dealt cards
+                    Card card1 = selectedCards[0];
+                    Card card2 = selectedCards[1];
+                    Card card3 = selectedCards[2];
+                    Card card4 = selectedCards[3];
 
                     // If Two Players, setup and show card selection box to buy cards
                     if (getIsTwoPlayer()) {
+                        /* * * * * * * * * * * * * * * * * * * * * */
+                        /* Code for Player 2 to see and buy cards  */
+                        /* * * * * * * * * * * * * * * * * * * * * */
+
                         // Toggle buttons to choose which cards to buy
                         ToggleButton toggle1 = new ToggleButton();
                         ToggleButton toggle2 = new ToggleButton();
                         ToggleButton toggle3 = new ToggleButton();
                         ToggleButton toggle4 = new ToggleButton();
-                        // Grab currently selected/dealt cards
-                        Card card1 = selectedCards[0];
-                        Card card2 = selectedCards[1];
-                        Card card3 = selectedCards[2];
-                        Card card4 = selectedCards[3];
+
                         // Add image of cards selected to toggle buttons
                         toggle1.setStyle("-fx-graphic: url('" + card1.getImageUrl() + "')");
                         toggle2.setStyle("-fx-graphic: url('" + card2.getImageUrl() + "')");
@@ -311,15 +295,15 @@ public class Main extends Application {
                         dialog.show();
                     // If One Player, run computer logic
                     } else {
-                        /* * * * * * * * * * * * * * * * * * */
-                        // Code for computer logic to buy cards
-                        /* * * * * * * * * * * * * * * * * * */
+                        /* * * * * * * * * * * * * * * * * * * * */
+                        /* Code for computer logic to buy cards  */
+                        /* * * * * * * * * * * * * * * * * * * * */
 
                         // Setup new window to show bought cards by computer
                         final Stage dialog = new Stage();
                         dialog.initModality(Modality.APPLICATION_MODAL);
                         dialog.initOwner(primaryStage);
-
+                        // To hold bought cards in display
                         HBox dialogHbox = new HBox(20);
 
                         // Add text
@@ -327,18 +311,13 @@ public class Main extends Application {
                         message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
                         dialogHbox.getChildren().add(message);
 
-                        /* Logic to choose cards and place them in the dialogHbox */
-                        // Grab currently selected/dealt cards
-                        Card card1 = selectedCards[0];
-                        Card card2 = selectedCards[1];
-                        Card card3 = selectedCards[2];
-                        Card card4 = selectedCards[3];
-
-                        // Single card matching
+                        /* * Logic to choose cards and place them in the dialogHbox * */
+                        /* Single card matching */
                         if (selectPatternIndex < 17) {
-                            // Loops through all possible pattern matches and if any of the
-                            // four selected cards match it will be added to the dialogHbox
+                            // Loops through all possible pattern matches
                             for (int i = 0; i < currentPatternMatches.length; i++) {
+                                // If current PatternMatch isn't null and a card matches in value, suit and color
+                                // it is added to display and 'bought'
                                 if(currentPatternMatches[i] != null) {
                                     if (currentPatternMatches[i].getValue() == card1.getValue()) {
                                         if (currentPatternMatches[i].getSuit() == card1.getSuit()) {
@@ -367,51 +346,95 @@ public class Main extends Application {
                                 }
                             }
                         } else {
-                            // Multi card matching
+                            /* Multi card matching */
+
+                            // Store values of selected cards in variables for easier access and comparison
+                            int val1 = card1.getValue();
+                            int val2 = card2.getValue();
+                            int val3 = card3.getValue();
+                            int val4 = card4.getValue();
+
                             switch (selectPattern) {
                                 case "Two of a Kind":
                                     // Finds two cards with same value i.e. two of a kind/pair
+
                                     // Setup in else if so only one pair is selected from the bunch
-                                    if (card1.getValue() == card2.getValue()) {
+                                    if (val1 == val2) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
-                                    } else if (card1.getValue() == card3.getValue()) {
+                                    } else if (val1 == val3) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card1.getValue() == card4.getValue()) {
+                                    } else if (val1 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card2.getValue() == card3.getValue()) {
+                                    } else if (val2 == val3) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card2.getValue() == card4.getValue()) {
+                                    } else if (val2 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card3.getValue() == card4.getValue()) {
+                                    } else if (val3 == val4) {
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    }
+                                    break;
+                                case "Four of a Kind":
+                                    if (val1 == val2 && val1 == val3 && val1 == val4) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
                                     }
                                     break;
                                 case "Three of a Kind":
                                     // Finds three cards with same value i.e. three of a kind
+
                                     // Setup in else if so only one trio is selected from the bunch
-                                    if (card1.getValue() == card2.getValue() && card1.getValue() == card3.getValue()) {
+                                    if (val1 == val2 && val1 == val3) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card1.getValue() == card2.getValue() && card1.getValue() == card4.getValue()) {
+                                    } else if (val1 == val2 && val1 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card1.getValue() == card3.getValue() && card1.getValue() == card4.getValue()) {
+                                    } else if (val1 == val3 && val1 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card2.getValue() == card3.getValue() && card2.getValue() == card4.getValue()) {
+                                    } else if (val2 == val3 && val2 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
                                     }
+                                    break;
+                                case "Two Pair":
+                                    // Verifies there are two pairs of different cards
+
+                                    if (val1 == val2) {
+                                        if (val3 == val4 && val1 != val3) {
+                                            dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                        }
+                                    } else if (val1 == val3) {
+                                        if (val2 == val4 && val1 != val2) {
+                                            dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                        }
+                                    } else if (val1 == val4) {
+                                        if (val2 == val3 && val1 != val2) {
+                                            dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                            dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                        }
+                                    }
+                                    break;
                             }
                         }
                         Scene dialogScene = new Scene(dialogHbox, 800, 200);
@@ -430,7 +453,6 @@ public class Main extends Application {
                 // Deal cancelled
                 else if(result.get() == ButtonType.CANCEL) {
                     // Cancel button is pressed
-                    System.out.println("Confirm cancelled");
                 }
             // If there aren't 4 cards selected to deal
             } else {
@@ -438,8 +460,6 @@ public class Main extends Application {
                 a.setContentText("MUST be 4 cards chosen to deal!");
                 a.show();
             }
-
-
         });
 
 
@@ -473,9 +493,9 @@ public class Main extends Application {
 
     // Maps keys and images together for all 52 cards
     public void setupCards(Map<String, Card> cards, HBox hbox) {
-
         int i = 0;  // Column counter and value(add 1 for constructor)
         int j = 0;  // Row counter and suit
+
         // Creating Map of Card Objects
         for (int k = 0; k < 52; k++) {
             /*  If/else constructs Card objects Black or Red relative to the order the images are stored
@@ -491,7 +511,7 @@ public class Main extends Application {
                         + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
                         + (k + 1) + ".png"));
             }
-
+            // Increment j every 13th card to create 4 equal rows in display
             if((i % 12) == 0 && i != 0) {
                 j++;
                 i = 0;
@@ -499,16 +519,17 @@ public class Main extends Application {
                 i++;
             }
 
-            int finalK = k;
+            int finalK = k; // used inside cardEventHandler, must be final to do so
+
             // Adds click event handler to place card in hbox
             cards.get("card" + k).getImage().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                 int numSelected = hbox.getChildren().size();
                 Card curCard = cards.get("card" + finalK);
+
                 if(numSelected < 4) {
                     hbox.getChildren().add(curCard.getImage());
                     selectedCards[numSelected] = curCard;
                 }
-
                 e.consume();
             });
 
@@ -571,21 +592,23 @@ public class Main extends Application {
 
 
     // Was sending in global variables, just need to access them no need to use as arguments
-    private void storePattern(String[] choices1, Map<String, PatternMatch[]> patternMatches, Map<String, PatternMatch[][]> multiCardPatternMatches) // Cpu selects pattern at random
-    {
-        int upperBound = -1; // Limit Question based on difficulty
+    private void storePattern(String[] choices1, Map<String, PatternMatch[]> patternMatches) {// Cpu selects pattern at random
+        // Limit Pattern based on difficulty
+        int upperBound = -1;
         if (difficulty == 0)
             upperBound = 6;
         if (difficulty == 1)
             upperBound = 19;
         if (difficulty == 2)
             upperBound = choices1.length;
+
         // Randomly selecting pattern from choices with random index
         Random rand = new Random();
-        selectPatternIndex = rand.nextInt(upperBound);
+
+        // TESTING
+        //selectPatternIndex = rand.nextInt(upperBound);
+        selectPatternIndex = 19;    // selecting "Two Pair" for testing
         selectPattern = choices1[selectPatternIndex];
-
-
 
         System.out.println("Current Pattern: " + selectPattern);
 
@@ -594,9 +617,6 @@ public class Main extends Application {
             currentPatternMatches = new PatternMatch[patternMatches.get(selectPattern).length];
             currentPatternMatches = patternMatches.get(selectPattern).clone();
             // If above 17 it's a multi card matching pattern
-        } else {
-            currentMultiCardPatternMatches = new PatternMatch[multiCardPatternMatches.get(selectPattern).length][];
-            currentMultiCardPatternMatches = multiCardPatternMatches.get(selectPattern).clone();
         }
     }
 
@@ -604,7 +624,6 @@ public class Main extends Application {
     {
         selectPattern = s1;
         playerGuess = guesses.getValue();
-        System.out.println("Guess was clicked!");
       
         // Alert if the player has used all guesses, only shows when 0 guesses
         Alert a = new Alert(AlertType.WARNING);
@@ -633,22 +652,12 @@ public class Main extends Application {
                 guessBtn.setDisable(true);
             }
         }
-        //System.out.println(playerGuess);
-        //System.out.println("pattern = " + selectPattern);
-    }
-
-    public static void resetGame() {
-        // Put guesses back to appropriate level
-
-
-        // Randomly select new pattern
-
-        //
     }
 
     public static String setupDifficulty() {
-        String diffDisplay = "";
+        String diffDisplay = "";    // String to be returned to display chosen difficulty
 
+        // Create alert and text to show inside
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Difficulty Level");
         alert.setHeaderText("Choose the level of Difficulty you'd like to play");
@@ -660,6 +669,7 @@ public class Main extends Application {
         ButtonType buttonMedium = new ButtonType("Medium");
         ButtonType buttonHard = new ButtonType("Hard");
 
+        // Add Buttons to Alert
         alert.getButtonTypes().setAll(buttonEasy, buttonMedium, buttonHard);
 
         Optional<ButtonType> result = alert.showAndWait();
@@ -672,21 +682,26 @@ public class Main extends Application {
         } else if (result.get() == buttonHard) {
             // ... user chose "Hard"
             setDifficulty(HARD);
+
             // Give user option of One or Two Players for Hard
             alert.setTitle("Number of Players");
             alert.setHeaderText("Choose how many Players will participate");
             alert.setContentText("Choose your option: One or Two Players. Remember to press" +
                     "'Start Game' after selecting!");
+
             // Buttons to select One or Two Players
             ButtonType buttonOnePlayer = new ButtonType("One Player");
             ButtonType buttonTwoPlayer = new ButtonType("Two Players");
 
             // Remove difficulty choice buttons
             alert.getButtonTypes().removeAll(buttonEasy, buttonMedium, buttonHard);
+
             // Add Number of Players choice buttons
             alert.getButtonTypes().setAll(buttonOnePlayer, buttonTwoPlayer);
+
             // Get result of button user pressed
             Optional<ButtonType> playerResult = alert.showAndWait();
+
             // Two Players if chosen
             if (playerResult.get() == buttonTwoPlayer) {
                 setIsTwoPlayer(true);
@@ -711,17 +726,15 @@ public class Main extends Application {
                 diffDisplay = "Hard";
                 break;
         }
-
         return diffDisplay;
     }
 
-    public static void setupPatternMatches(Map<String, PatternMatch[]> pmMap, Map<String, PatternMatch[][]> multipmMap, Map<String, Card> cards, String[] patterns) {
+    public static void setupPatternMatches(Map<String, PatternMatch[]> pmMap, Map<String, Card> cards, String[] patterns) {
         // Loops through all patterns and sets the matching patterns in appropriate Map structure
         for (int i = 0; i < patterns.length; i++) {
             // Store the pattern to
             String pattern = patterns[i];
             matchSingleCardsToPattern(pattern, pmMap, cards);
-            matchMultipleCardsToPattern(pattern, multipmMap, cards);
         }
 
     }
@@ -907,59 +920,6 @@ public class Main extends Application {
                 pmMap.put(pattern, colorValueMatches);      // Place pattern and matching array in Map object
                 break;
         }
-    }
-
-    public static void matchMultipleCardsToPattern(String pattern, Map<String, PatternMatch[][]> pmMap, Map<String, Card> cards) {
-        PatternMatch[][] twoOfAKindMatches = new PatternMatch[156][]; // for Two of a Kind cases
-        PatternMatch[][] threeOfAKindMatches = new PatternMatch[312][]; // for Three of a Kind cases
-
-        int arrayCounter = 0;
-
-        switch (pattern) {
-            case "Two of a Kind":
-                for (int i = 0; i < cards.size(); i++) {
-                    Card curCard = cards.get("card" + i);
-                    for (int j = 0; j < cards.size(); j++) {
-                        Card compareCard = cards.get("card" + j);
-                        // If they aren't the same card but have the same value
-                        if (i != j && curCard.getValue() == compareCard.getValue()) {
-                            PatternMatch[] pair = new PatternMatch[2];
-                            pair[0] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
-                            pair[1] = new PatternMatch(compareCard.getValue(), compareCard.getSuit(), compareCard.getColor());
-                            twoOfAKindMatches[arrayCounter] = pair;
-                            arrayCounter++;
-                        }
-                    }
-                }
-                pmMap.put(pattern, twoOfAKindMatches);      // Place pattern and matching array in Map object
-                break;
-            case "Three of a Kind":
-                for (int i = 0; i < cards.size(); i++) {
-                    Card curCard = cards.get("card" + i);
-                    // Loop to find a matching card
-                    for (int j = 0; j < cards.size(); j++) {
-                        Card compareCard1 = cards.get("card" + j);
-                        // If they aren't the same card but have the same value
-                        if (i != j && curCard.getValue() == compareCard1.getValue()) {
-                            // Now loop once more to find third matching card
-                            for (int k = 0; k < cards.size(); k++) {
-                                Card compareCard2 = cards.get("card" + k);
-                                if ( i != k && j != k && compareCard1.getValue() == compareCard2.getValue()) {
-                                    PatternMatch[] trio = new PatternMatch[3];
-                                    trio[0] = new PatternMatch(curCard.getValue(), curCard.getSuit(), curCard.getColor());
-                                    trio[1] = new PatternMatch(compareCard1.getValue(), compareCard1.getSuit(), compareCard1.getColor());
-                                    trio[2] = new PatternMatch(compareCard2.getValue(), compareCard2.getSuit(), compareCard2.getColor());
-                                    threeOfAKindMatches[arrayCounter] = trio;
-                                    arrayCounter++;
-                                }
-                            }
-                        }
-                    }
-                }
-                pmMap.put(pattern, threeOfAKindMatches);      // Place pattern and matching array in Map object
-                break;
-        }
-
     }
 
     public static int getGuessCounter() { return guessCounter; }
