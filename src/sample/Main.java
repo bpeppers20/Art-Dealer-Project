@@ -39,7 +39,6 @@ public class Main extends Application {
     private Card[] selectedCards = new Card[4]; // Holds cards selected/dealt
     private static int guessCounter;            // Holds guesses left to use by player
     private static int difficulty;              // Holds difficulty level for game
-    private int numOfCardsBought = 0;           // Holds number of cards bought, used to enable guessBtn
     private static boolean isTwoPlayer = false; // Holds if the game is played by one or two players
 
     public void start(Stage primaryStage) throws Exception{
@@ -243,28 +242,19 @@ public class Main extends Application {
                         // Confirm Buy Button
                         Button confirmBuyBtn = new Button("Purchase Selected 'Paintings'");
                         confirmBuyBtn.setOnAction(e2 -> {
-                            numOfCardsBought = 0;
                             // Add text
                             Text message = new Text("These were the cards purchased!!");
                             message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
                             dialogHbox.getChildren().add(message);
                             // Place bought card images in dialogHbox
-                            if (toggle1.isSelected()) {
+                            if (toggle1.isSelected())
                                 dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
-                                numOfCardsBought++;
-                            }
-                            if (toggle2.isSelected()) {
+                            if (toggle2.isSelected())
                                 dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
-                                numOfCardsBought++;
-                            }
-                            if (toggle3.isSelected()) {
+                            if (toggle3.isSelected())
                                 dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                numOfCardsBought++;
-                            }
-                            if (toggle4.isSelected()) {
+                            if (toggle4.isSelected())
                                 dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                numOfCardsBought++;
-                            }
 
                             // Remove toggle buttons
                             dialogHbox.getChildren().removeAll(toggle1, toggle2, toggle3, toggle4);
@@ -697,7 +687,6 @@ public class Main extends Application {
             b.setContentText("Your guess was wrong! Try Again!");
             b.show();
         }
-    }
     }
 
     public static String setupDifficulty() {
