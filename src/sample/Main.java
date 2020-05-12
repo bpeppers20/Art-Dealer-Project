@@ -49,7 +49,7 @@ public class Main extends Application {
         GridPane gridPane = new GridPane();
 
         //Setting size for the pane
-        gridPane.setMinSize(400, 200);
+        gridPane.setMinSize(500, 200);
 
         //Setting the padding
         gridPane.setPadding(new Insets(10, 10, 10, 10));
@@ -83,7 +83,7 @@ public class Main extends Application {
                 "-fx-border-radius: 95%;");
 
         // Add guessVbox to gridPane
-        gridPane.add(guessVbox, 9,7,2,1);
+        gridPane.add(guessVbox, 9,7,3,1);
 
         // Data structure to hold images of all cards
         Map<String, Card> cards = new HashMap<String, Card>();
@@ -477,7 +477,7 @@ public class Main extends Application {
         gridPane.add(closeButton, 13, 8);
         gridPane.add(confirmDealBtn, 13, 2);
         gridPane.add(resetDealBtn, 13, 1);
-        gridPane.add(restartGame, 11, 9);
+        gridPane.add(restartGame, 11, 9, 2, 1);
         gridPane.add(startGame, 13, 9);
         gridPane.add(howtoBtn, 10, 9);
         Scene scene = new Scene(gridPane);
@@ -494,7 +494,7 @@ public class Main extends Application {
         //Label for difficulty
         Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
         // Add difficulty label to gridPane
-        gridPane.add(difficultyLabel, 9, 6);
+        gridPane.add(difficultyLabel, 9, 6, 2, 1);
 
         // Set guesses remaining text and add to ui
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
