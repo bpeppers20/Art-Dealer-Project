@@ -592,9 +592,7 @@ public class Main extends Application {
             upperBound = choices1.length;
         // Randomly selecting pattern from choices with random index
         Random rand = new Random();
-        // TESTING - choosing "Three of a Kind" on purpose
-        selectPatternIndex = 18;
-        //selectPatternIndex = rand.nextInt(upperBound);
+        selectPatternIndex = rand.nextInt(upperBound);
         selectPattern = choices1[selectPatternIndex];
 
 
