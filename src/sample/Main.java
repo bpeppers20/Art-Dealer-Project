@@ -129,7 +129,7 @@ public class Main extends Application {
         {
             guesses.getItems().add(choices1[i]);
         }
-        gridPane.add(guesses, 12, 6);
+        gridPane.add(guesses, 13, 6);
 
 
         // -- Make a Guess -- Moved to Line 314
@@ -354,13 +354,13 @@ public class Main extends Application {
         c.setContentText("0 Guesses remaining! Game Lost!");
         // Add buttons to GridPane
         gridPane.add(randomDealBtn, 13, 0);
-        gridPane.add(guessBtn, 13, 1);
-        gridPane.add(closeButton, 13, 2);
-        gridPane.add(confirmDealBtn, 13, 7);
-        gridPane.add(resetDealBtn, 13, 8);
-        gridPane.add(restartGame, 12, 9);
+        gridPane.add(guessBtn, 13, 3);
+        gridPane.add(closeButton, 13, 8);
+        gridPane.add(confirmDealBtn, 13, 2);
+        gridPane.add(resetDealBtn, 13, 1);
+        gridPane.add(restartGame, 11, 9);
         gridPane.add(startGame, 13, 9);
-        gridPane.add(howtoBtn, 11, 9);
+        gridPane.add(howtoBtn, 10, 9);
         Scene scene = new Scene(gridPane);
 
         primaryStage.setTitle("Art Dealer Game");
@@ -375,7 +375,7 @@ public class Main extends Application {
         //Label for difficulty
         Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
         // Add difficulty label to gridPane
-        gridPane.add(difficultyLabel, 13, 3);
+        gridPane.add(difficultyLabel, 9, 6);
 
         // Set guesses remaining text and add to ui
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
