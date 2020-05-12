@@ -65,7 +65,8 @@ public class Main extends Application {
         // GridPane styling
         gridPane.setStyle("-fx-background-color: GREEN; -fx-font-family: 'Cambria Math';");
 
-        String difficultyDisplay = "";  // String that displays the difficulty chosen
+        // String that displays the difficulty chosen
+        String difficultyDisplay = "";
 
         // Current Card section
         HBox hbox = new HBox();
@@ -104,7 +105,7 @@ public class Main extends Application {
         // All Guessing Options : < 6 = k-2; < 17 = 3-5; entire list = 6-8
         String [] choices1 = {"All Red", "All Black", "All Kings", "All Jacks", "All Queens", "All Aces",
                 "All Even", "All Odd", "All Face", "Black Kings", "Black Queens", "Black Aces", "Black Jacks",
-                "Red Kings", "Red Queens","Red Aces","Red Jacks", "Two of a Kind", "Three of a Kind", "Two Pair"};
+                "Red Kings", "Red Queens","Red Aces","Red Jacks", "Two of a Kind", "Three of a Kind", "Four of a Kind", "Two Pair"};
 
         // Stores all the possible cards that match a pattern
         // i.e. cards to buy when a specific pattern is chosen
@@ -216,6 +217,10 @@ public class Main extends Application {
 
                     // If Two Players, setup and show card selection box to buy cards
                     if (getIsTwoPlayer()) {
+                        /* * * * * * * * * * * * * * * * * * * * * */
+                        /* Code for Player 2 to see and buy cards  */
+                        /* * * * * * * * * * * * * * * * * * * * * */
+
                         // Toggle buttons to choose which cards to buy
                         ToggleButton toggle1 = new ToggleButton();
                         ToggleButton toggle2 = new ToggleButton();
@@ -290,15 +295,15 @@ public class Main extends Application {
                         dialog.show();
                     // If One Player, run computer logic
                     } else {
-                        /* * * * * * * * * * * * * * * * * * */
-                        // Code for computer logic to buy cards
-                        /* * * * * * * * * * * * * * * * * * */
+                        /* * * * * * * * * * * * * * * * * * * * */
+                        /* Code for computer logic to buy cards  */
+                        /* * * * * * * * * * * * * * * * * * * * */
 
                         // Setup new window to show bought cards by computer
                         final Stage dialog = new Stage();
                         dialog.initModality(Modality.APPLICATION_MODAL);
                         dialog.initOwner(primaryStage);
-
+                        // To hold bought cards in display
                         HBox dialogHbox = new HBox(20);
 
                         // Add text
@@ -306,9 +311,8 @@ public class Main extends Application {
                         message.setStyle("-fx-font-size: 150%; -fx-font-weight: bolder;");
                         dialogHbox.getChildren().add(message);
 
-                        /* Logic to choose cards and place them in the dialogHbox */
-
-                        // Single card matching
+                        /* * Logic to choose cards and place them in the dialogHbox * */
+                        /* Single card matching */
                         if (selectPatternIndex < 17) {
                             // Loops through all possible pattern matches
                             for (int i = 0; i < currentPatternMatches.length; i++) {
@@ -342,57 +346,71 @@ public class Main extends Application {
                                 }
                             }
                         } else {
-                            // Multi card matching
+                            /* Multi card matching */
+
+                            // Store values of selected cards in variables for easier access and comparison
+                            int val1 = card1.getValue();
+                            int val2 = card2.getValue();
+                            int val3 = card3.getValue();
+                            int val4 = card4.getValue();
+
                             switch (selectPattern) {
                                 case "Two of a Kind":
                                     // Finds two cards with same value i.e. two of a kind/pair
+
                                     // Setup in else if so only one pair is selected from the bunch
-                                    if (card1.getValue() == card2.getValue()) {
+                                    if (val1 == val2) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
-                                    } else if (card1.getValue() == card3.getValue()) {
+                                    } else if (val1 == val3) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card1.getValue() == card4.getValue()) {
+                                    } else if (val1 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card2.getValue() == card3.getValue()) {
+                                    } else if (val2 == val3) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card2.getValue() == card4.getValue()) {
+                                    } else if (val2 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card3.getValue() == card4.getValue()) {
+                                    } else if (val3 == val4) {
+                                        dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
+                                    }
+                                    break;
+                                case "Four of a Kind":
+                                    if (val1 == val2 && val1 == val3 && val1 == val4) {
+                                        dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
+                                        dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
                                     }
                                     break;
                                 case "Three of a Kind":
                                     // Finds three cards with same value i.e. three of a kind
+
                                     // Setup in else if so only one trio is selected from the bunch
-                                    if (card1.getValue() == card2.getValue() && card1.getValue() == card3.getValue()) {
+                                    if (val1 == val2 && val1 == val3) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
-                                    } else if (card1.getValue() == card2.getValue() && card1.getValue() == card4.getValue()) {
+                                    } else if (val1 == val2 && val1 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card1.getValue() == card3.getValue() && card1.getValue() == card4.getValue()) {
+                                    } else if (val1 == val3 && val1 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card1.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
-                                    } else if (card2.getValue() == card3.getValue() && card2.getValue() == card4.getValue()) {
+                                    } else if (val2 == val3 && val2 == val4) {
                                         dialogHbox.getChildren().add(new ImageView(card2.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card3.getImageUrl()));
                                         dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
                                     }
+                                    break;
                                 case "Two Pair":
                                     // Verifies there are two pairs of different cards
-                                    int val1 = card1.getValue();
-                                    int val2 = card2.getValue();
-                                    int val3 = card3.getValue();
-                                    int val4 = card4.getValue();
 
                                     if (val1 == val2) {
                                         if (val3 == val4 && val1 != val3) {
@@ -416,6 +434,7 @@ public class Main extends Application {
                                             dialogHbox.getChildren().add(new ImageView(card4.getImageUrl()));
                                         }
                                     }
+                                    break;
                             }
                         }
                         Scene dialogScene = new Scene(dialogHbox, 800, 200);
