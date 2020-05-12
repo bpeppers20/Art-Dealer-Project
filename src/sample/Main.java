@@ -5,6 +5,7 @@ import java.awt.event.InputEvent;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -32,6 +33,7 @@ public class Main extends Application {
     public static PatternMatch[] currentPatternMatches;     // Holds single card pattern matches
     public static String playerGuess = "";                  // Player Guess
     public final static int EASY = 0, MEDIUM = 1, HARD = 2; // Difficulty level codes
+    public static int isCorrect = 0;
 
     private Stage mainStage;
     private Card[] selectedCards = new Card[4]; // Holds cards selected/dealt
@@ -39,8 +41,6 @@ public class Main extends Application {
     private static int difficulty;              // Holds difficulty level for game
     private int numOfCardsBought = 0;           // Holds number of cards bought, used to enable guessBtn
     private static boolean isTwoPlayer = false; // Holds if the game is played by one or two players
-
-
 
     public void start(Stage primaryStage) throws Exception{
         this.mainStage = primaryStage;
@@ -74,7 +74,7 @@ public class Main extends Application {
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(10);
         hbox.setStyle("-fx-background-color: #336699;");
-        // Add hbox to gridPane at the bottom
+        // Add hbox to gridPane at the bottom left
         gridPane.add(hbox, 0, 7, 8,2);
 
         // Guess Counter box - added to display after difficulty chosen
@@ -95,6 +95,18 @@ public class Main extends Application {
         addCards(gridPane, cards);
 
         /* * * * Buttons * * * */
+
+        // How to Play Button
+        Alert htpMsg = new Alert(AlertType.INFORMATION);
+        htpMsg.setContentText("This is the Art Dealer Game! Here's how you play: The game is played using the standard poker deck of 52 cards. The Student will be the “Art Seller” and the computer will be the “Art Dealer”.\n " +
+                "In the 6-8 Difficulty Level a second Student will be able to play the role of “Art Dealer” making it a two-player game.\n " +
+                "The Art Dealer wants to “buy paintings” represented by the cards in the deck.\n " +
+                "The “Art Seller” wants to discover what kinds of “paintings” (cards) the “Art Dealer” is purchasing. There will be varying patterns depending on the Difficulty Level; these will be listed in the Difficulty Levels section.\n" +
+                "\n" +
+                "Each turn the “Art Seller” will lay out 4 cards from the deck. The “Art Dealer” will buy certain cards that depend on the pattern determined for this round of the game. The “Art Seller” must observe what, if any, cards are bought to eventually determine what the pattern is that the “Art Dealer” is buying.\n" +
+                "You win by having the buyer buy ALL 4 selected cards and guessing the right pattern. You lose when you run out of guesses\n");
+        Button howtoBtn = new Button("How to Play");
+        howtoBtn.setOnAction(event -> htpMsg.show());
 
         // -- Close Application --
         Button closeButton = new Button("Close Application");
@@ -119,29 +131,7 @@ public class Main extends Application {
         for (int i= 0; i < choices1.length; i++) {
             guesses.getItems().add(choices1[i]);
         }
-        gridPane.add(guesses, 12, 6);
-      
-        // Start Game button: stores randomly selected pattern for this game 
-        Button startGame = new Button("Start Game");
-        startGame.setOnAction(event -> storePattern(choices1, patternMatches));
-        gridPane.add(startGame, 13, 9);
-        // -- Make a Guess --
-        // ToDo: Need to add real action
-        // 1. If playing against computer
-        // a. Show input box for guess
-        // b.
-        // 2. If playing against Student
-        // a. Show input box for guess
-        // b. Once entered, show 'Correct' and 'Wrong' buttons
-        // c. 2nd player will click one of the buttons
-        // i. Correct -> Game is over and player won
-        // ii. Wrong  -> Decrement guess counter, start next turn
-
-        // Make Answer to be guessed
-
-        Button guessBtn = new Button("Make a Guess");
-
-        guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses, guessVbox, guessBtn));
+        gridPane.add(guesses, 13, 6);
 
         // -- Random Deal --
         Button randomDealBtn = new Button("Random Deal");
@@ -462,14 +452,44 @@ public class Main extends Application {
             }
         });
 
+        // So that a lose condition can be enforced
+        Button guessBtn = new Button("Make a Guess");
+        guessBtn.setOnAction(e -> guessEvent(selectPattern, playerGuess, guesses, guessVbox, guessBtn,randomDealBtn, confirmDealBtn, resetDealBtn));
 
+        // Start Game button: stores randomly selected pattern for this game and enable "in-game" buttons
+        guessBtn.setDisable(true);
+        randomDealBtn.setDisable(true);
+        confirmDealBtn.setDisable(true);
+        resetDealBtn.setDisable(true);
+        Button startGame = new Button("Start Game");
+        startGame.setOnAction(event -> storePattern(choices1, patternMatches, guessBtn, randomDealBtn, confirmDealBtn, resetDealBtn, startGame));
+
+        // Restart button and function
+        Button restartGame = new Button("Restart Game");
+        restartGame.setOnAction( event ->
+        {
+            System.out.println( "Restarting app!" );
+            primaryStage.close();
+            Platform.runLater( () -> {
+                try {
+                    new Main().start( new Stage() );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } ); // Reset Game Manually
+
+        Alert c = new Alert(AlertType.WARNING);
+        c.setContentText("0 Guesses remaining! Game Lost!");
         // Add buttons to GridPane
         gridPane.add(randomDealBtn, 13, 0);
-        gridPane.add(guessBtn, 13, 1);
-        gridPane.add(closeButton, 13, 2);
-        gridPane.add(confirmDealBtn, 13, 7);
-        gridPane.add(resetDealBtn, 13, 8);
-
+        gridPane.add(guessBtn, 13, 3);
+        gridPane.add(closeButton, 13, 8);
+        gridPane.add(confirmDealBtn, 13, 2);
+        gridPane.add(resetDealBtn, 13, 1);
+        gridPane.add(restartGame, 11, 9);
+        gridPane.add(startGame, 13, 9);
+        gridPane.add(howtoBtn, 10, 9);
         Scene scene = new Scene(gridPane);
 
         primaryStage.setTitle("Art Dealer Game");
@@ -484,7 +504,7 @@ public class Main extends Application {
         //Label for difficulty
         Text difficultyLabel = new Text("Difficulty: " + difficultyDisplay);
         // Add difficulty label to gridPane
-        gridPane.add(difficultyLabel, 13, 3);
+        gridPane.add(difficultyLabel, 9, 6);
 
         // Set guesses remaining text and add to ui
         Text guessesRemainingLabel = new Text(String.valueOf(getGuessCounter()));
@@ -511,7 +531,7 @@ public class Main extends Application {
                         + (k + 1) + ".png")), "https://liveexample.pearsoncmg.com/book/image/card/"
                         + (k + 1) + ".png"));
             }
-            // Increment j every 13th card to create 4 equal rows in display
+            // Increment j every 13th card and reset i to create 4 equal rows in display
             if((i % 12) == 0 && i != 0) {
                 j++;
                 i = 0;
@@ -590,11 +610,10 @@ public class Main extends Application {
         }
     };
 
-
-    // Was sending in global variables, just need to access them no need to use as arguments
-    private void storePattern(String[] choices1, Map<String, PatternMatch[]> patternMatches) {// Cpu selects pattern at random
-        // Limit Pattern based on difficulty
-        int upperBound = -1;
+    private void storePattern(String[] choices1, Map<String, PatternMatch[]> patternMatches, Button guessBtn, Button randomDealBtn, Button confirmDealBtn, Button resetDealBtn, Button startGame) // Cpu selects pattern at random
+    {
+        // Limit Question based on difficulty
+        int upperBound = -1; 
         if (difficulty == 0)
             upperBound = 6;
         if (difficulty == 1)
@@ -604,14 +623,16 @@ public class Main extends Application {
 
         // Randomly selecting pattern from choices with random index
         Random rand = new Random();
-
-        // TESTING
-        //selectPatternIndex = rand.nextInt(upperBound);
-        selectPatternIndex = 19;    // selecting "Two Pair" for testing
+        selectPatternIndex = rand.nextInt(upperBound);
         selectPattern = choices1[selectPatternIndex];
-
-        System.out.println("Current Pattern: " + selectPattern);
-
+  
+        // Enable Buttons to play game
+        guessBtn.setDisable(false);
+        randomDealBtn.setDisable(false);
+        confirmDealBtn.setDisable(false);
+        resetDealBtn.setDisable(false);
+        // Disable Start Game Button to prevent mid-game pattern changes
+        startGame.setDisable(true);
         // 17 is last index of EASY and MEDIUM, all of which only match single cards
         if (selectPatternIndex < 17) {
             currentPatternMatches = new PatternMatch[patternMatches.get(selectPattern).length];
@@ -620,21 +641,23 @@ public class Main extends Application {
         }
     }
 
-    public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses, VBox guessVbox, Button guessBtn)
+    public void guessEvent(String s1, String playerGuess, ChoiceBox<String> guesses, VBox guessVbox, Button guessBtn, Button randomDealBtn, Button confirmDealBtn, Button resetDealBtn)
     {
         selectPattern = s1;
         playerGuess = guesses.getValue();
       
-        // Alert if the player has used all guesses, only shows when 0 guesses
+        // Alert if the player has used all guesses
         Alert a = new Alert(AlertType.WARNING);
-        a.setContentText("0 Guesses remaining! Game Lost!");
+        a.setContentText("0 Guesses remaining! Game Lost! Please Close or Restart Game");
       
         if (playerGuess.equals(selectPattern))
         {
             System.out.println("Your Guess was Correct!");
+            isCorrect = 1;
         }
         else{
             System.out.println("Your Guess was Wrong! Try Again!");
+            isCorrect = 2;
           
             if (guessCounter > 0) {
                 // Decrement global guess counter
@@ -650,8 +673,31 @@ public class Main extends Application {
                 // Show game lost alert if guesses are 0
                 a.show();
                 guessBtn.setDisable(true);
+                randomDealBtn.setDisable(true);
+                confirmDealBtn.setDisable(true);
+                resetDealBtn.setDisable(true);
             }
         }
+      
+        // Visual aid for correct or wrong guess
+        Alert b = new Alert(AlertType.NONE); // Create new Alert for guesses
+        if (isCorrect == 1)
+        {
+            b.setAlertType(AlertType.INFORMATION);
+            b.setContentText("Congratulations! Your guess was correct! Please Close or Restart!");
+            b.show();
+            guessBtn.setDisable(true);
+            randomDealBtn.setDisable(true);
+            confirmDealBtn.setDisable(true);
+            resetDealBtn.setDisable(true);
+        }
+        else
+        {
+            b.setAlertType(AlertType.INFORMATION);
+            b.setContentText("Your guess was wrong! Try Again!");
+            b.show();
+        }
+    }
     }
 
     public static String setupDifficulty() {
