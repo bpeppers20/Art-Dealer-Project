@@ -1,7 +1,8 @@
 # Art-Dealer-Project
 This was a group project developed using the Scrum (Agile) Method 
 
-Author: Nick Ray, Bryant Peppers, Amy Seidel
+Authors: Nick Ray, Bryant Peppers, Amy Seidel
+
 Description: The Art Dealer Game: This is a game that I often play when I teach software engineering face-to-face. Students are told that an “art dealer” wants to “buy” paintings represented by playing cards from a traditional poker deck of 52 cards. Student attempt to discover what kinds of cards (“paintings”) the art dealer is buying.
 
 At each turn,a student lays out 4 cards from their deck, and observe what the art dealer buys. The turns continue until the student can do two things: put out four cards, all of which the art dealer buys; and the student can describe what kind of cards the art dealer is buying.
